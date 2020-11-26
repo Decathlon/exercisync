@@ -58,7 +58,7 @@ msgstr "Le Hub n'a pas de traces de vos activités dans vos comptes"
 
 #: tapiriik/web/templates/activities-dashboard.html:44
 msgid "Have you synchronized lately?"
-msgstr "Avez-vous synchronisé récemment?"
+msgstr "Avez-vous synchronisé récemment ?"
 
 #: tapiriik/web/templates/activities-dashboard.html:45
 msgid "Loading..."
@@ -154,7 +154,7 @@ msgstr ""
 
 #: tapiriik/web/templates/dashboard.html:97
 msgid "Connect to your Decathlon services"
-msgstr "Connectez vous à votre compte DECATHLON"
+msgstr "Connectez-vous à votre compte DECATHLON"
 
 #: tapiriik/web/templates/dashboard.html:109
 msgid "Available services"
@@ -163,7 +163,7 @@ msgstr "Services disponibles"
 #: tapiriik/web/templates/dashboard.html:121
 #: tapiriik/web/templates/dashboard_old.html:73
 msgid "Did not find your service?"
-msgstr "Vous ne trouvez pas votre service?"
+msgstr "Vous ne trouvez pas votre service ?"
 
 #: tapiriik/web/templates/dashboard.html:121
 #: tapiriik/web/templates/dashboard_old.html:73
@@ -242,7 +242,7 @@ msgstr "Soutenir le projet"
 
 #: tapiriik/web/templates/donation.html:7
 msgid "Do you like the service and you want it to get even better?"
-msgstr "Vous aimez ce service et vous aimeriez qu'il soit encore mieux?"
+msgstr "Vous aimez ce service et vous aimeriez qu'il soit encore mieux ?"
 
 #: tapiriik/web/templates/donation.html:8
 msgid ""
@@ -361,7 +361,7 @@ msgstr "vos activités sportives nuit et jour"
 
 #: tapiriik/web/templates/email/payment_renew.html:7
 msgid "Want to continue automatic synchronization?"
-msgstr "Voulez vous continer la synchronisation automatique?"
+msgstr "Voulez-vous continuer la synchronisation automatique ?"
 
 #: tapiriik/web/templates/email/payment_renew.html:9
 msgid "If you want to keep automatic synchronization for another year, visit "
@@ -371,7 +371,7 @@ msgstr ""
 
 #: tapiriik/web/templates/email/payment_renew.html:9
 msgid "connect to one of your accounts, and click the "
-msgstr "Connectez vous à un de vos comptes et cliquer sur le"
+msgstr "Connectez-vous à un de vos comptes et cliquer sur le"
 
 #: tapiriik/web/templates/email/payment_renew.html:11
 msgid "Don't worry - you won't automatically be billed."
@@ -417,7 +417,7 @@ msgstr "Synchronisation"
 
 #: tapiriik/web/templates/manage-sync.html:23
 msgid "Sync now"
-msgstr "Lancer"
+msgstr "Lancer synchro"
 
 #: tapiriik/web/templates/manage-sync.html:36
 msgid "Sync date"
@@ -553,7 +553,7 @@ msgstr ""
 
 #: tapiriik/web/templates/privacy.html:30
 msgid "<span>What are</span>Access tokens?"
-msgstr "<span>Qu'est ce qu'un</span> Access tokens?"
+msgstr "<span>Qu'est ce qu'un</span> Access tokens ?"
 
 #: tapiriik/web/templates/privacy.html:31
 msgid ""
@@ -571,7 +571,7 @@ msgstr ""
 
 #: tapiriik/web/templates/privacy.html:35
 msgid "<span>What is</span>Activity metadata?"
-msgstr "<span>Qu'est ce qu'une</span> métadonnées?"
+msgstr "<span>Qu'est ce qu'une</span> métadonnée ?"
 
 #: tapiriik/web/templates/privacy.html:36
 msgid ""
@@ -580,13 +580,13 @@ msgid ""
 "information to determine which activities should be synchronized to each of "
 "your accounts."
 msgstr ""
-"Les métadonnées sont les informations basiques d'une activité: <b>date, "
+"Les métadonnées sont les informations basiques d'une activité : <b>date, "
 "durée, distance, et type</b>. Le Hub a besoin de stocker ces "
 "informations afin de déterminer quelles activités doivent être synchronisées."
 
 #: tapiriik/web/templates/privacy.html:40
 msgid "<span>What constitutes</span>Activity data?"
-msgstr "<span>Que comporte les </span>données d'activités?"
+msgstr "<span>Que comporte les </span>données d'activités ?"
 
 #: tapiriik/web/templates/privacy.html:41
 msgid ""
@@ -835,19 +835,19 @@ msgstr "Questions: réponses"
 
 #: tapiriik/web/templates/static/faq.html:9
 msgid "What do I have to do to use Hub by DECATHLON?"
-msgstr "Que dois-je faire pour utiliser le Hub by DECATHLON?"
+msgstr "Que dois-je faire pour utiliser le Hub by DECATHLON ?"
 
 #: tapiriik/web/templates/static/faq.html:10
 msgid ""
 "Just connect to all the services you would like to sync between, click &quot;"
 "Synchronize now,&quot; then forget ever reading this sentence."
 msgstr ""
-"Connectez vous à tous vos services que vous souhaitez synchroniser, cliquez sur"
-"&quot; Synchronisation maintenant &quot;"
+"Il suffit de vous connecter à tous les services que vous souhaitez synchroniser, puis cliquez sur "
+"&quot; Lancer Synchro &quot;"
 
 #: tapiriik/web/templates/static/faq.html:14
 msgid "Do I need to re-connect my accounts every time?"
-msgstr "Dois-je me connecter à mes comptes à chaque fois?"
+msgstr "Dois-je connecter mes comptes à chaque fois ?"
 
 #: tapiriik/web/templates/static/faq.html:15
 msgid ""
@@ -855,31 +855,31 @@ msgid ""
 "have already connected</strong>, and you will be signed back into Hub by "
 "DECATHLON and ready to start another synchronization."
 msgstr ""
-"<strong>Non!</strong> Connectez vous seulement à un compte deja synchronisé "
-"et vous serez reconnu sur le Hub."
+"<strong>Non !</strong> Continuez simplement d'utiliser vos services préalablement liés "
+"au Hub by DECATHLON qui se chargera automatiquement de la synchronisation."
 
 #: tapiriik/web/templates/static/faq.html:19
 msgid "Do I need to visit hub.decathlon.com to sync activities?"
-msgstr "Dois-je visiter hub.decathlon.com pour synchroniser mes activités?"
+msgstr "Dois-je visiter hub.decathlon.com pour synchroniser mes activités ?"
 
 #: tapiriik/web/templates/static/faq.html:20
 msgid ""
 "<b>No. Synchronization is fully automatic.</b> You can also manually trigger "
 "a synchronization any time you want."
 msgstr ""
-"<b>Non, la synchronisation est automatique</b> Vous pouvez aussi déclencher "
-"manuellement la synchronisation manuellement quand vous le souhaitez."
+"<b>Non, la synchronisation est automatique.</b> Vous pouvez aussi déclencher "
+"la synchronisation manuellement quand vous le souhaitez."
 
 #: tapiriik/web/templates/static/faq.html:24
 msgid "Which activities get synchronized?"
-msgstr "Quelles sont les activités synchronisées?"
+msgstr "Quelles sont les activités synchronisées ?"
 
 #: tapiriik/web/templates/static/faq.html:25
 msgid ""
 "<b>All supported activities in your account are synchronized</b>, since the "
 "start date indicated. Garmin Health is the only exception, you could not "
 "sync your history and it is one way could only get activities from Garmin."
-msgstr "Toutes les activités supportées sont synchronisées à partir de la date de démarrage. Garmin Health est une exception, il n'y a pas de reprise d'historique ni de transfère vers Garmin Health."
+msgstr "Toutes les activités supportées sont synchronisées à partir de la date de démarrage. Garmin Health est une exception, il n'y a pas de reprise d'historique ni de transfert vers Garmin Health."
 
 #: tapiriik/web/templates/static/faq.html:29
 msgid "What's the difference from"
@@ -895,7 +895,7 @@ msgstr ""
 
 #: tapiriik/web/templates/static/faq.html:34
 msgid "Will Hub by DECATHLON create duplicate activities?"
-msgstr "Est-ce que le Hub créé des doublons d'activités?"
+msgstr "Est-ce que le Hub by DECATHLON crée des doublons d'activités ?"
 
 #: tapiriik/web/templates/static/faq.html:35
 msgid ""
@@ -908,16 +908,16 @@ msgstr ""
 
 #: tapiriik/web/templates/static/faq.html:39
 msgid "What about activities I've marked as private?"
-msgstr "Que se passe-t-il pour les activités marquées comme privées?"
+msgstr "Que se passe-t-il pour les activités marquées comme privées ?"
 
 #: tapiriik/web/templates/static/faq.html:40
 msgid ""
 "By default, <b>Hub by DECATHLON will <u>not</u> sync private activities</b>."
-msgstr "Par défaut, avec certaines services, Hub by DECATHLON ne synchronisera pas vos activités privées."
+msgstr "Par défaut, avec certains services, Hub by DECATHLON ne synchronisera pas vos activités privées."
 
 #: tapiriik/web/templates/static/faq.html:44
 msgid "What data gets synchronized?"
-msgstr "Quelles sont les donnéees synchronisées?"
+msgstr "Quelles sont les données synchronisées ?"
 
 #: tapiriik/web/templates/static/faq.html:45
 msgid ""
@@ -925,13 +925,13 @@ msgid ""
 "sync <b>distance, speed, heart rate, cadence, power, calories burned and "
 "even temperature</b> between all services which support them."
 msgstr ""
-"Le plus possible: avec votre parcours, Hub by DECATHLON essaiera aussi de "
-"synchroniser <b>la distance, la vitesse, le cadio, la puissance, les kcal et "
-"même la température vers les service qui le supportent.</b>"
+"Autant que possible : en plus de votre parcours, Hub by DECATHLON essaiera aussi de "
+"synchroniser <b>la distance, la vitesse, le cardio, la puissance, les calories et "
+"même la température</b> vers les <b>services qui le supportent.</b>"
 
 #: tapiriik/web/templates/static/faq.html:49
 msgid "The activity statistics changed after a sync!"
-msgstr "Les statistiques de l'activité changent après chaque synchronisation!"
+msgstr "Les statistiques de l'activité changent après chaque synchronisation !"
 
 #: tapiriik/web/templates/static/faq.html:50
 msgid ""
@@ -940,13 +940,14 @@ msgid ""
 "the same values</strong>. <strong>Hub by DECATHLON does not calculate these</"
 "strong> during synchronization."
 msgstr ""
-"Les différents servicent utilisent des algorithmes différents pour le calcul "
-"des dénivelés, des kcal... Hub by DECATHLON ne recalcule pas ces valeurs "
+"Des écart peuvent effectivement apparaitres. "
+"Les différents services n'utilisent pas des algorithmes similaires pour le calcul "
+"des dénivelés, des kcal, etc. Hub by DECATHLON ne recalcule pas ces valeurs "
 "durant la synchronisation."
 
 #: tapiriik/web/templates/static/faq.html:54
 msgid "Can I view which activities were synchronized?"
-msgstr "Est-ce que je peux voir quelles sont les activités synchronisées?"
+msgstr "Est-ce que je peux voir quelles activités ont été synchronisées ?"
 
 #: tapiriik/web/templates/static/faq.html:55
 msgid "When logged in, you can <b>visit the "
@@ -958,33 +959,33 @@ msgstr "tableau de bord des activités"
 
 #: tapiriik/web/templates/static/faq.html:55
 msgid "to see which activities were (or were not) synchronized, and to where."
-msgstr "pour voir quelles activités sont (ou pas) synchronisées et où"
+msgstr "pour voir quelles activités ont (ou n'ont pas) été synchronisées, ainsi que le service d'origine et de destination."
 
 #: tapiriik/web/templates/static/faq.html:59
 msgid "Can I sync in only one direction?"
-msgstr "Est-ce que je peux seulement synchroniser dans une seule direction?"
+msgstr "Est-ce que je peux seulement synchroniser dans une seule direction ?"
 
 #: tapiriik/web/templates/static/faq.html:60
 msgid ""
 "No: the Hub by DECATHLON tries to transfer all activities to others services "
 "(except Garmin Health)."
-msgstr "Non : le Hub by DECATHLON essaye de transférer toutes les activités vers les autres services (excepté Garmin Health)."
+msgstr "Non : le Hub by DECATHLON essaie de transférer toutes les activités vers les autres services (À l'exception de Garmin Health)."
 
 #: tapiriik/web/templates/static/faq.html:64
 msgid "Does Hub by DECATHLON ever modify or delete my activities?"
-msgstr "Est-ce que le Hub by DECATHLON modifie ou supprime mes activités?"
+msgstr "Est-ce que le Hub by DECATHLON modifie ou supprime mes activités ?"
 
 #: tapiriik/web/templates/static/faq.html:65
 msgid "<b>No.</b> Simple as that."
-msgstr "<b>non.</b> Juste de la synchronisation."
+msgstr "<b>Non.</b> Seule la synchronisation peut mener à des écarts en fonction des algorythmes employés par les différents services."
 
 #: tapiriik/web/templates/static/faq.html:69
 msgid "What data is stored on your servers?"
-msgstr "Quelles sont les données stockées sur vos serveurs?"
+msgstr "Quelles sont les données stockées sur vos serveurs ?"
 
 #: tapiriik/web/templates/static/faq.html:70
 msgid "As little as is required. Check out the"
-msgstr "Aussi peu que possible, verifiez la"
+msgstr "Le strict minimum. Consultez la"
 
 #: tapiriik/web/templates/static/faq.html:70
 msgid "for more."
@@ -992,7 +993,7 @@ msgstr "pour en savoir plus."
 
 #: tapiriik/web/templates/static/faq.html:74
 msgid "How do I connect more services?"
-msgstr "Comment je connecte plus de services?"
+msgstr "Comment puis-je connectee plus de services ?"
 
 #: tapiriik/web/templates/static/faq.html:75
 msgid ""
@@ -1000,12 +1001,12 @@ msgid ""
 "the new service (or the other way around, it doesn't matter). The new "
 "service will be synchronized with all the others."
 msgstr ""
-"Connectez-vous à un service deja connecté, puis connectez-vous aux nouveaux "
-"services. Les nouveaux services seront synchronisés avec les autres."
+"Connectez-vous à un service déja lié au Hub, puis connectez-vous aux nouveaux "
+"services. Ils seront synchronisés avec ceux qui ont été précédemment liés au Hub."
 
 #: tapiriik/web/templates/static/faq.html:79
 msgid "What about Fitbit ?"
-msgstr "Comment fonctionne Fitbit?"
+msgstr "Comment fonctionne Fitbit ?"
 
 #: tapiriik/web/templates/static/faq.html:80
 msgid ""
@@ -1015,13 +1016,13 @@ msgid ""
 "hand, Fitbit will only be able to retrieve summaries of the activities "
 "carried out on the other services."
 msgstr ""
-"Lors de l'activation n'oubliez pas d'activer les partages. Fitbit ne permet "
+"Lors de l'activation, n'oubliez pas d'activer les partages. Fitbit ne permet "
 "pas aujourd'hui d'enregistrer les courbes GPS provenant d'autres services "
 "comme le Hub."
 
 #: tapiriik/web/templates/static/faq.html:83
 msgid "What about Garmin Health ?"
-msgstr "Comment fonctionne Garmin Health?"
+msgstr "Comment fonctionne Garmin Health ?"
 
 #: tapiriik/web/templates/static/faq.html:84
 msgid ""
@@ -1036,23 +1037,23 @@ msgstr ""
 
 #: tapiriik/web/templates/static/faq.html:88
 msgid "Will Hub by DECATHLON support <i>Activity Tracking Site X</i>?"
-msgstr "Est-ce que le Hub supportera <i>le site d'activités sportives X</i>?"
+msgstr "Est-ce que le Hub supportera <i>le site d'activités sportives X </i>?"
 
 #: tapiriik/web/templates/static/faq.html:89
 msgid "Possibly. We are open to contribute to connected sport ecosystem."
-msgstr "C'est possible! Nous sommes ouvert pour contribuer à l'écosystème du sport connécté."
+msgstr "C'est possible ! Nous sommes ouvert pour contribuer à l'écosystème du sport connecté."
 
 #: tapiriik/web/templates/static/faq.html:93
 msgid "Can Hub by DECATHLON and CopyMySports or SyncMyTracks be used together?"
-msgstr "Est ce que le Hub et CopyMySports ou SyncMyTracks peuvent être utilisés ensemble?"
+msgstr "Est-ce-que le Hub et CopyMySports ou SyncMyTracks peuvent être utilisés ensemble ?"
 
 #: tapiriik/web/templates/static/faq.html:94
 msgid ""
 "<b>We wouldn't recommend it</b> - CopyMySports or SyncMyTracks will often "
 "create duplicates of activities Hub by DECATHLON has already synchronized."
 msgstr ""
-"<b>Nous ne le recommandons pas</b> - CopyMySports ou SyncMyTracks pourra créé régulièrement des "
-"doublons d'activités que le Hub aura deja synchronisés."
+"<b>Nous ne le recommandons pas</b> - L'utilisation conjointe du Hub By DECATHLON et de CopyMySports ou SyncMyTracks pourrait créer régulièrement des "
+"doublons d'activités que le Hub aura déja synchronisés."
 
 #: tapiriik/web/templates/supported-activities.html:16
 msgid "This list doesn't matter"
@@ -1103,8 +1104,8 @@ msgstr ""
 #~ "Oui: <b>avant de lancer la synchronisation</b>, ouvrez les options pour "
 #~ "le service et indiquez les synchronisations de service à service."
 
-#~ msgid "What are \"untagged activities\" and why do I care?"
-#~ msgstr "Qu'est ce que les \"activités non taguées\" et que dois-je faire?"
+#~ msgid "What are \"untagged activities\" and why do I care ?"
+#~ msgstr "Qu'est ce que les \"activités non taguées\" et que dois-je faire ?"
 
 #~ msgid ""
 #~ "GPX and TCX files in your Dropbox don't include information about the "
@@ -1125,8 +1126,8 @@ msgstr ""
 #~ msgid "appropriately named folder"
 #~ msgstr "répertoire approprié"
 
-#~ msgid "Who is \"Hub by DECATHLON\" on Garmin Connect?"
-#~ msgstr "Qui est \"Hub By DECATHLON\" sur Garmin Connect?"
+#~ msgid "Who is \"Hub by DECATHLON\" on Garmin Connect ?"
+#~ msgstr "Qui est \"Hub By DECATHLON\" sur Garmin Connect ?"
 
 #~ msgid ""
 #~ "To enable efficient synchronization, <b>Hub by DECATHLON adds a special "
