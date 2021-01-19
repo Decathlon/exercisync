@@ -370,7 +370,10 @@ class FitbitService(ServiceBase):
                                                                   }), serviceRecord)
 
         if resp.status_code != 204 and resp.status_code != 200:
-            raise APIException("Unable to deauthorize Fitbit auth token, status " + str(resp.status_code) + " resp " + resp.text)
+            # The modification below was made to fix the case where an user revoke the Hub access from fitbit.
+            # Now the user can disconnect the service from the Hub without blocking.
+            # raise APIException("Unable to deauthorize Fitbit auth token, status " + str(resp.status_code) + " resp " + resp.text)
+            logging.warning("Impossible to revoke from fitbit. Deleting connection from the Hub Anyway")
 
         logging.info("Revoke Fitbit Authorization")
 
