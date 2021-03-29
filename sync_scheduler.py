@@ -8,6 +8,9 @@ import uuid
 import json
 import logging
 
+from tapiriik.services import Service
+from tapiriik.services.ratelimiting import RedisRateLimit
+from tapiriik.settings import WITHDRAWN_SERVICES
 
 logger = logging.getLogger('Sync Scheduler')
 logger = _GLOBAL_LOGGER
@@ -15,7 +18,22 @@ logger.info("-----[ INITIALIZE SYNC_SCHEDULER ]-----")
 sqsManager = SqsManager()
 sqsManager.get_queue()
 
+watched_rate_limited_svc = [svc for svc in Service.List() if svc.ID not in WITHDRAWN_SERVICES and svc.GlobalRateLimits != []]
+
 while True:
+    
+    holding_message_sent = False
+    was_on_hold = False
+
+    while RedisRateLimit.IsOneRateLimitReached(watched_rate_limited_svc):
+        was_on_hold = True
+        if not holding_message_sent:
+            logger.warning("ONE RATE LIMIT REACHED HOLDING THE SCHEDULER")
+            holding_message_sent = True
+
+    if was_on_hold:
+        logger.info("Rate limits refreshed the scheduler is back to work !")
+
     generation = str(uuid.uuid4())
     queueing_at = datetime.utcnow()
     users = list(db.users.with_options(read_preference=ReadPreference.PRIMARY).find(

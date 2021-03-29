@@ -5,7 +5,7 @@ from tapiriik.database import cachedb, db
 from tapiriik.services.interchange import UploadedActivity, ActivityType, ActivityStatistic, ActivityStatistics, ActivityStatisticUnit, Waypoint, WaypointType, Location, Lap
 from tapiriik.services.api import APIException, UserException, UserExceptionType, APIExcludeActivity, ServiceException
 from tapiriik.services.fit import FITIO
-from tapiriik.services.ratelimiting import RateLimit, RateLimitExceededException
+from tapiriik.services.ratelimiting import RateLimit, RateLimitExceededException, RedisRateLimit
 
 from django.core.urlresolvers import reverse
 from datetime import datetime, timedelta
@@ -440,7 +440,7 @@ class StravaService(ServiceBase):
 
     def _rate_limit(self):
         try:
-            RateLimit.Limit(self.ID)
+            # RateLimit.Limit(self.ID)
+            RedisRateLimit.Limit(self.ID, self.GlobalRateLimits)
         except RateLimitExceededException:
-            logger.info("STRAVA rate limit reached")
             raise ServiceException("Global rate limit reached", user_exception=UserException(UserExceptionType.RateLimited), trigger_exhaustive=False)

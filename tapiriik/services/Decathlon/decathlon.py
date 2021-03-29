@@ -1,7 +1,7 @@
 # Synchronization module for decathloncoach.com
 # (c) 2018 Charles Anssens, charles.anssens@decathlon.com
 from tapiriik.settings import WEB_ROOT, DECATHLON_CLIENT_SECRET, DECATHLON_CLIENT_ID, DECATHLON_OAUTH_URL, DECATHLON_API_KEY, DECATHLON_API_BASE_URL, DECATHLON_RATE_LIMITS, DECATHLON_LOGIN_CLIENT_SECRET, DECATHLON_LOGIN_CLIENT_ID, DECATHLON_LOGIN_OAUTH_URL
-from tapiriik.services.ratelimiting import RateLimit, RateLimitExceededException
+from tapiriik.services.ratelimiting import RateLimit, RateLimitExceededException, RedisRateLimit
 from tapiriik.services.service_base import ServiceAuthenticationType, ServiceBase
 from tapiriik.services.service_record import ServiceRecord
 from tapiriik.database import cachedb
@@ -600,7 +600,8 @@ class DecathlonService(ServiceBase):
 
     def _rate_limit(self):
         try:
-            RateLimit.Limit(self.ID)
+            # RateLimit.Limit(self.ID)
+            RedisRateLimit.Limit(self.ID, self.GlobalRateLimits)
         except RateLimitExceededException:
             raise ServiceException("Global rate limit reached", user_exception=UserException(UserExceptionType.RateLimited), trigger_exhaustive=False)
 

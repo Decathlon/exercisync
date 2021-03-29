@@ -1,4 +1,4 @@
-from tapiriik.services.ratelimiting import RateLimit, RateLimitExceededException
+from tapiriik.services.ratelimiting import RateLimit, RateLimitExceededException, RedisRateLimit
 from tapiriik.services.api import ServiceException, UserExceptionType, UserException
 
 class ServiceAuthenticationType:
@@ -159,7 +159,8 @@ class ServiceBase:
 
     def _globalRateLimit(self):
         try:
-            RateLimit.Limit(self.ID)
+            # RateLimit.Limit(self.ID)
+            RedisRateLimit.Limit(self.ID, self.GlobalRateLimits)
         except RateLimitExceededException:
             raise ServiceException("Global rate limit reached", user_exception=UserException(UserExceptionType.RateLimited))
 
