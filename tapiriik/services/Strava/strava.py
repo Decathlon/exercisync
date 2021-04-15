@@ -1,7 +1,7 @@
 from tapiriik.settings import WEB_ROOT, STRAVA_CLIENT_SECRET, STRAVA_CLIENT_ID, STRAVA_RATE_LIMITS
 from tapiriik.services.service_base import ServiceAuthenticationType, ServiceBase
 from tapiriik.services.service_record import ServiceRecord
-from tapiriik.database import cachedb, db
+from tapiriik.database import cachedb, db, redis
 from tapiriik.services.interchange import UploadedActivity, ActivityType, ActivityStatistic, ActivityStatistics, ActivityStatisticUnit, Waypoint, WaypointType, Location, Lap
 from tapiriik.services.api import APIException, UserException, UserExceptionType, APIExcludeActivity, ServiceException
 from tapiriik.services.fit import FITIO
@@ -163,76 +163,64 @@ class StravaService(ServiceBase):
     def DownloadActivityList(self, svcRecord, exhaustive=False):
         activities = []
         exclusions = []
-        before = earliestDate = None
         
-        # We put an after date in the request because it might be exhaustive up to 30 activities
-        after_param = (datetime.now() - timedelta(days=7)).strftime('%s')
-        
-        while True:
-            if before is not None and before < 0:
-                break # Caused by activities that "happened" before the epoch. We generally don't care about those activities...
-            logger.debug("Req with before=" + str(before) + "/" + str(earliestDate))
-            logger.info("STRAVA call download activities")
-            resp = self._requestWithAuth(lambda session: session.get("https://www.strava.com/api/v3/athletes/" + str(svcRecord.ExternalID) + "/activities", params={"after": after_param}), svcRecord)
+        # We get the activities that needs to be sync
+        redis_key = "strava:webhook:"+str(svcRecord.ExternalID)
+        activity_ids_list = redis.lrange(redis_key, 0, -1)
+
+        # For each activities
+        for act_id in activity_ids_list:
+            # We delete it from the redis list to avoid syncing a second time
+            # For an strange reason we have to do :
+            #       redis.lrem(key, value)
+            # Even if redis, redis-py docs and the signature of the function in the container ask to do
+            #       redis.lrem(key, count ,value)
+            result = redis.lrem(redis_key, act_id)
+            if result == 0:
+                logger.warning("Cant delete the activity %s from the redis key %s" % (int(act_id), redis_key))
+            elif result > 1 :
+                logger.warning("Found more than one time the activity %s from the redis key %s" % (int(act_id), redis_key))
+            
+            resp = self._requestWithAuth(lambda session: session.get("https://www.strava.com/api/v3/activities/" + str(int(act_id))), svcRecord)
             if resp.status_code == 401:
                 raise APIException("No authorization to retrieve activity list", block=True, user_exception=UserException(UserExceptionType.Authorization, intervention_required=True))
             if 429 == resp.status_code:
                 raise APIException("Rate limit exeception %s - %s" % (resp.status_code, resp.text), trigger_exhaustive=False)
 
-            earliestDate = None
-
             try:
-                reqdata = resp.json()
+                ride = resp.json()
             except ValueError:
-                raise APIException("Failed parsing strava list response %s - %s" % (resp.status_code, resp.text), trigger_exhaustive=False)
+                raise APIException("Failed parsing strava response %s - %s" % (resp.status_code, resp.text), trigger_exhaustive=False)
 
-            if not len(reqdata):
-                break  # No more activities to see
+            activity = UploadedActivity()
+            activity.TZ = pytz.timezone(re.sub("^\([^\)]+\)\s*", "", ride["timezone"]))  # Comes back as "(GMT -13:37) The Stuff/We Want""
+            activity.StartTime = pytz.utc.localize(datetime.strptime(ride["start_date"], "%Y-%m-%dT%H:%M:%SZ"))
+            logger.debug("\tActivity s/t %s: %s" % (activity.StartTime, ride["name"]))
 
-            for ride in reqdata:
-                activity = UploadedActivity()
-                activity.TZ = pytz.timezone(re.sub("^\([^\)]+\)\s*", "", ride["timezone"]))  # Comes back as "(GMT -13:37) The Stuff/We Want""
-                activity.StartTime = pytz.utc.localize(datetime.strptime(ride["start_date"], "%Y-%m-%dT%H:%M:%SZ"))
-                logger.debug("\tActivity s/t %s: %s" % (activity.StartTime, ride["name"]))
-                if not earliestDate or activity.StartTime < earliestDate:
-                    earliestDate = activity.StartTime
-                    before = calendar.timegm(activity.StartTime.astimezone(pytz.utc).timetuple())
+            activity.EndTime = activity.StartTime + timedelta(seconds=ride["elapsed_time"])
+            activity.ServiceData = {"ActivityID": str(int(act_id)), "Manual": ride["manual"]}
+            activity.Stationary = ride["manual"]
+            activity.Name = ride["name"]
 
-                activity.EndTime = activity.StartTime + timedelta(0, ride["elapsed_time"])
-                activity.ServiceData = {"ActivityID": ride["id"], "Manual": ride["manual"]}
+            if ride["type"] not in self._reverseActivityTypeMappings:
+                exclusions.append(APIExcludeActivity("Unsupported activity type %s" % ride["type"], activity_id=ride["id"], user_exception=UserException(UserExceptionType.Other)))
+                logger.debug("\t\tUnknown activity")
+                continue
 
-                if ride["type"] not in self._reverseActivityTypeMappings:
-                    exclusions.append(APIExcludeActivity("Unsupported activity type %s" % ride["type"], activity_id=ride["id"], user_exception=UserException(UserExceptionType.Other)))
-                    logger.debug("\t\tUnknown activity")
-                    continue
+            activity.Type = self._reverseActivityTypeMappings[ride["type"]]
+            activity.Stats.Distance = ActivityStatistic(ActivityStatisticUnit.Meters, value=ride.get("distance"))
+            activity.Stats.Speed = ActivityStatistic(ActivityStatisticUnit.MetersPerSecond, avg=ride.get("average_speed"), max=ride.get("max_speed") if ride.get("max_speed") != 0 else ride.get("average_speed"))
+            activity.Stats.MovingTime = ActivityStatistic(ActivityStatisticUnit.Seconds, value=ride.get("moving_time"))
+            activity.Stats.Power = ActivityStatistic(ActivityStatisticUnit.Watts, avg=ride.get("average_watts"), max=ride.get("max_watts"))
+            activity.Stats.HR = ActivityStatistic(ActivityStatisticUnit.BeatsPerMinute, avg=ride.get("average_heartrate"), max=ride.get("max_watts"))
+            activity.Stats.Cadence = ActivityStatistic(ActivityStatisticUnit.RevolutionsPerMinute, avg=ride.get("average_cadence"))
+            activity.Stats.Temperature = ActivityStatistic(ActivityStatisticUnit.DegreesCelcius, avg=ride.get("average_temp"))
+            activity.Stats.Energy = ActivityStatistic(ActivityStatisticUnit.Kilocalories, value=ride.get("calories"))
 
-                activity.Type = self._reverseActivityTypeMappings[ride["type"]]
-                activity.Stats.Distance = ActivityStatistic(ActivityStatisticUnit.Meters, value=ride["distance"])
-                if "max_speed" in ride or "average_speed" in ride:
-                    activity.Stats.Speed = ActivityStatistic(ActivityStatisticUnit.MetersPerSecond, avg=ride["average_speed"] if "average_speed" in ride else None, max=ride["max_speed"] if "max_speed" in ride else None)
-                activity.Stats.MovingTime = ActivityStatistic(ActivityStatisticUnit.Seconds, value=ride["moving_time"] if "moving_time" in ride and ride["moving_time"] > 0 else None)  # They don't let you manually enter this, and I think it returns 0 for those activities.
-                # Strava doesn't handle "timer time" to the best of my knowledge - although they say they do look at the FIT total_timer_time field, so...?
-                if "average_watts" in ride:
-                    activity.Stats.Power = ActivityStatistic(ActivityStatisticUnit.Watts, avg=ride["average_watts"])
-                if "average_heartrate" in ride:
-                    activity.Stats.HR.update(ActivityStatistic(ActivityStatisticUnit.BeatsPerMinute, avg=ride["average_heartrate"]))
-                if "max_heartrate" in ride:
-                    activity.Stats.HR.update(ActivityStatistic(ActivityStatisticUnit.BeatsPerMinute, max=ride["max_heartrate"]))
-                if "average_cadence" in ride:
-                    activity.Stats.Cadence.update(ActivityStatistic(ActivityStatisticUnit.RevolutionsPerMinute, avg=ride["average_cadence"]))
-                if "average_temp" in ride:
-                    activity.Stats.Temperature.update(ActivityStatistic(ActivityStatisticUnit.DegreesCelcius, avg=ride["average_temp"]))
-                if "calories" in ride:
-                    activity.Stats.Energy = ActivityStatistic(ActivityStatisticUnit.Kilocalories, value=ride["calories"])
-                activity.Name = ride["name"]
-                activity.Stationary = ride["manual"]
-                activity.GPS = ("start_latlng" in ride) and (ride["start_latlng"] is not None)
-                activity.AdjustTZ()
-                activity.CalculateUID()
-                activities.append(activity)
-
-            if not exhaustive or not earliestDate:
-                break
+            activity.GPS = ride.get("start_latlng") != None
+            activity.AdjustTZ()
+            activity.CalculateUID()
+            activities.append(activity)
 
         return activities, exclusions
 
@@ -250,6 +238,7 @@ class StravaService(ServiceBase):
         if "create" == data["aspect_type"] and "activity" == data["object_type"]:
             isAlreadyKnown = db.uploaded_activities.find_one({"ExternalID" : {"$eq": data["object_id"]} })
             if isAlreadyKnown == None:
+                redis.rpush("strava:webhook:"+str(data["owner_id"]), data["object_id"])
                 return [data["owner_id"]]
             else :
                 return []
