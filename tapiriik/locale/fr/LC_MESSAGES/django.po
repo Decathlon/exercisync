@@ -119,6 +119,12 @@ msgstr "synchronisez vos activités"
 msgid "Manage your services"
 msgstr "Services disponibles"
 
+msgid "Manage your input services"
+msgstr "Services fournisseurs d'activités"
+
+msgid "Manage your output services"
+msgstr "Services recevant des activités"
+
 #: tapiriik/web/templates/dashboard.html:36
 #: tapiriik/web/templates/dashboard_old.html:38
 msgid "Some activities could not be synchronized."
