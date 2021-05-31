@@ -299,7 +299,7 @@ class DecathlonService(ServiceBase):
 
                     activity.StartTime = datebase #pytz.utc.localize(datebase)
                     
-                    activity.ServiceData = {"ActivityID": ride["id"], "Manual": ride["manual"]}
+                    activity.ServiceData = {"ActivityID": ride["id"], "Manual": ride["manual"], "Origin": "decathlon"}
                     
                     logging.info("\t\t Decathlon Activity ID : " + ride["id"])
         
@@ -421,7 +421,7 @@ class DecathlonService(ServiceBase):
                 if "6" in root["datastream"][measure]:
                     ridedata[delta]['SPEED'] = int(root["datastream"][measure]["6"])
                 if self._unitMap["cadence"] in root["datastream"][measure]:
-                    ridedata[delta]['CADENCE'] = int(root["datastream"][measure]["10"])
+                    ridedata[delta]['R_CADENCE'] = int(root["datastream"][measure]["10"])
                 if self._unitMap["rpm"] in root["datastream"][measure]:
                     ridedata[delta]['CADENCE'] = int(root["datastream"][measure]["100"])
                 if "178" in root["datastream"][measure]:
@@ -463,6 +463,9 @@ class DecathlonService(ServiceBase):
 
                 if 'CADENCE' in rd :
                     wp.Cadence = rd['CADENCE']
+
+                if 'R_CADENCE' in rd :
+                     wp.RunCadence = rd['R_CADENCE']
 
                 if 'POWER' in rd :
                     wp.Power = rd['POWER']

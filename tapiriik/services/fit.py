@@ -842,7 +842,7 @@ class FITIO:
 				if wp.HR is not None:
 					rec_contents.update({"heart_rate": wp.HR})
 				if wp.RunCadence is not None:
-					rec_contents.update({"cadence": wp.RunCadence})
+					rec_contents.update({"cadence": (wp.RunCadence/2 if act.ServiceData.get("Origin") == "decathlon" else wp.RunCadence)})
 				if wp.Cadence is not None:
 					rec_contents.update({"cadence": wp.Cadence})
 				if wp.Power is not None:
