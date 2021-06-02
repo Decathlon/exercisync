@@ -709,6 +709,11 @@ class FitbitService(ServiceBase):
 
 
     def SubscribeToPartialSyncTrigger(self, serviceRecord):
+        # Safety features to avoid resubscribing multiple times
+        if serviceRecord.PartialSyncTriggerSubscribed:
+            logging.warning("Trying to re-subscribe an already subscribed user skipping")
+            return
+        
         webhook_sub_URL = "https://api.fitbit.com/1/user/-/activities/apiSubscriptions/"+serviceRecord.ExternalID+".json?subscriberId=" + FITBIT_SUBSCRIBER_ID
         logging.info(webhook_sub_URL)
 
