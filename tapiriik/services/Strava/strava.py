@@ -178,6 +178,8 @@ class StravaService(ServiceBase):
                 raise APIException("No authorization to retrieve activity list", block=True, user_exception=UserException(UserExceptionType.Authorization, intervention_required=True))
             if 429 == resp.status_code:
                 raise APIException("Rate limit exeception %s - %s" % (resp.status_code, resp.text), trigger_exhaustive=False)
+            if 404 == resp.status_code:
+                raise APIException("Resource not found %s - %s" % (resp.status_code, resp.text), trigger_exhaustive=False)
 
             earliestDate = None
 
