@@ -34,7 +34,7 @@ def diag_stats(req):
     active_services_list = [svc for svc in Service.List() if svc.ID not in WITHDRAWN_SERVICES]
     mongo_count_webhook_subscribed_users = db.connections.count({"Service":"fitbit","PartialSyncTriggerSubscribed":True})
 
-    usr_only_connected_to_coach = db.users.count({ "$and": [{"ConnectedServices":{"$size" : 1}}, {"ConnectedServices":{"$elemMatch": {"Service":"decathlon"}}}]}, projection={"ConnectedServices": 1, "_id": 0})
+    usr_only_connected_to_coach = db.users.count({ "$and": [{"ConnectedServices":{"$size" : 1}}, {"ConnectedServices":{"$elemMatch": {"Service":"decathlon"}}}]})
 
 
     context["services_stats"] = []
