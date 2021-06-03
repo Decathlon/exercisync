@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
-from .interchange import WaypointType, ActivityStatisticUnit, ActivityType, LapIntensity, LapTriggerMethod, Activity, Lap, UploadedActivity, Waypoint, Location, ActivityStatistics
+from .interchange import WaypointType, ActivityStatisticUnit, ActivityType, LapIntensity, LapTriggerMethod, Activity, Lap, UploadedActivity, Waypoint, Location, ActivityStatistics, Device
 from .devices import DeviceIdentifier, DeviceIdentifierType
+from fitparse.profile import FIELD_TYPES
 import struct
 import sys
 import pytz
@@ -521,7 +522,6 @@ class FITIO:
 	def Parse(fitData, activity=None):
 		import fitparse
 		from fitparse.records import DefinitionMessage, DataMessage
-		from fitparse.profile import FIELD_TYPES
 
 		# We create a new activity if it's not sent through that function
 		activity = activity if activity else UploadedActivity()
@@ -531,6 +531,7 @@ class FITIO:
 		fitfile.parse()
 
 		actividict = {
+			"file_id": None,
 			"waypoints": [],
 			"laps": [],
 			"sessions": [],
@@ -590,11 +591,23 @@ class FITIO:
 					# For multisport the activity will be tagged multisport and the sessions will tell the subsports
 					actividict["activity"] = msg_data
 
+				elif msg.name == "file_id":
+					# according to fit documentations there must be only one file_id record
+					actividict["file_id"] = msg_data
+
 
 		# We check if there is only one session for the moment
 		if len(actividict["sessions"]) == 1:
 			# We create a temp var for simplicity
 			actividata = actividict["sessions"][0]
+
+			#We init the Device object
+			activity.Device = Device(
+				manufacturer=actividict["file_id"].get("manufacturer"),
+				# If there is a product we take it else we take the garmin_product or None
+				product=actividict["file_id"].get("product",actividict["file_id"].get("garmin_product")),
+				serial=actividict["file_id"].get("serial_number")
+			)
 
 			# And we fill the activity data
 			activity.StartTime = actividata.get("start_time")
@@ -724,35 +737,46 @@ class FITIO:
 				raise ValueError("Need TZ data to produce FIT file")
 		fmg = FITMessageGenerator()
 
+		# As the keys are the IDs and not the names.
+		# So it is usefull to reverse keys and values
+		reversed_key_val_manufacturer = {FIELD_TYPES["manufacturer"].values[man_key]: man_key for man_key in FIELD_TYPES["manufacturer"].values.keys()}
+
 		creatorInfo = {
-			"manufacturer": FITManufacturer.DEVELOPMENT,
-			"serial_number": 0,
-			"product": 15706
+			# If we can't reverse the manufacturer (because of an old profile), i put the dev Manufacturer
+			"manufacturer": reversed_key_val_manufacturer.get(act.Device.Manufacturer, FITManufacturer.DEVELOPMENT),
+			# Looks like it can be anything we want but must be set so fallback to 0 if None
+			"serial_number": act.Device.Serial if act.Device.Serial != None else 0,
+			# Same here but it was previously 15706 by default and it worked well
+			"product": act.Device.Product if act.Device.Serial != None else 15706
 		}
 		devInfo = {
-			"manufacturer": FITManufacturer.DEVELOPMENT,
-			"product": 15706,
+			"manufacturer": reversed_key_val_manufacturer.get(act.Device.Manufacturer, FITManufacturer.DEVELOPMENT),
+			"product": act.Device.Product if act.Device.Serial != None else 15706,
 			"device_index": 0
 		}
-		if act.Device:
-			# GC can get along with out this, Strava needs it
-			devId = DeviceIdentifier.FindEquivalentIdentifierOfType(DeviceIdentifierType.FIT, act.Device.Identifier)
-			if devId:
-				creatorInfo = {
-					"manufacturer": devId.Manufacturer,
-					"product": devId.Product,
-				}
-				devInfo = {
-					"manufacturer": devId.Manufacturer,
-					"product": devId.Product,
-					"device_index": 0 # Required for GC
-				}
-				if act.Device.Serial:
-					creatorInfo["serial_number"] = int(act.Device.Serial) # I suppose some devices might eventually have alphanumeric serial #s
-					devInfo["serial_number"] = int(act.Device.Serial)
-				if act.Device.VersionMajor is not None:
-					assert act.Device.VersionMinor is not None
-					devInfo["software_version"] = act.Device.VersionMajor + act.Device.VersionMinor / 100
+
+		################################ 
+		# Just keeping the old Device management in case of bug
+		################################
+		# if act.Device:
+		# 	# GC can get along with out this, Strava needs it
+		# 	devId = DeviceIdentifier.FindEquivalentIdentifierOfType(DeviceIdentifierType.FIT, act.Device.Identifier)
+		# 	if devId:
+		# 		creatorInfo = {
+		# 			"manufacturer": devId.Manufacturer,
+		# 			"product": devId.Product,
+		# 		}
+		# 		devInfo = {
+		# 			"manufacturer": devId.Manufacturer,
+		# 			"product": devId.Product,
+		# 			"device_index": 0 # Required for GC
+		# 		}
+		# 		if act.Device.Serial:
+		# 			creatorInfo["serial_number"] = int(act.Device.Serial) # I suppose some devices might eventually have alphanumeric serial #s
+		# 			devInfo["serial_number"] = int(act.Device.Serial)
+		# 		if act.Device.VersionMajor is not None:
+		# 			assert act.Device.VersionMinor is not None
+		# 			devInfo["software_version"] = act.Device.VersionMajor + act.Device.VersionMinor / 100
 
 		fmg.GenerateMessage("file_id", type=FITFileType.Activity, time_created=toUtc(act.StartTime), **creatorInfo)
 		fmg.GenerateMessage("device_info", **devInfo)

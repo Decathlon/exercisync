@@ -58,6 +58,18 @@ class ActivityType:  # taken from RK API docs. The text values have no meaning e
                 return True
         return False
 
+class Device:
+    def __init__(self, manufacturer=None, product=None, serial=None) -> None:
+        self.Manufacturer = manufacturer
+        self.Product = product
+        self.Serial = serial
+    
+    def asdict(self):
+        return {
+            "Manufacturer": self.Manufacturer,
+            "Product": self.Product,
+            "Serial": self.Serial,
+        }
 
 class Activity:
     def __init__(self, startTime=None, endTime=None, actType=ActivityType.Other, distance=None, name=None, notes=None, tz=None, lapList=None, private=False, fallbackTz=None, stationary=None, gps=None, device=None, fitFileUrl=None):
