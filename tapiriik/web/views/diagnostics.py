@@ -157,6 +157,14 @@ def server_status(req):
 def server_status_elb(req):
     return HttpResponse(status=200)
 
+
+def server_securitytxt(request):
+    lines = [
+        "# We strongly appreciate exchange about security for the users",
+        "Contact: mailto:infra@decathloncoach.com",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
+
 @diag_requireAuth
 def diag_errors(req):
     context = {}
