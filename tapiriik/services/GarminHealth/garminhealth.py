@@ -4,6 +4,7 @@ from tapiriik.services.service_record import ServiceRecord
 from tapiriik.database import cachedb, db
 from tapiriik.services.interchange import UploadedActivity, ActivityType, ActivityStatistic, ActivityStatistics, ActivityStatisticUnit, Waypoint, WaypointType, Location, Lap
 from tapiriik.services.api import APIException, UserException, UserExceptionType
+from tapiriik.services.fit import FITIO
 from django.core.urlresolvers import reverse
 from datetime import date, datetime, timezone, timedelta
 from urllib.parse import urlencode
@@ -198,200 +199,50 @@ class GarminHealthService(ServiceBase):
         activities = []
         exclusions = []
 
-        # WARNING : BE CAREFULL ABOUT DATE FILTER
-        # date filter of this request will follow this process :
-        # - fetching activity with uploaded date between  upload_start_time & upload_end_time
-        # - return matched activities
-        # For example :
-        # if you upload at 20-05-2019 an activity into Garmin with start date 01-01-2019
-        # and you use upload_start_time=20-05-2019 & upload_end_time=21-05-2019
-        # the 01-01-2019 will be return
-        # So we download activities from upload date
-
         redis_key = "garminhealth:webhook:"+str(svcRecord.ExternalID)
-        activity_urls_list = redis.lrange(redis_key, 0, -1)
+        activity_file_urls_list = redis.lrange(redis_key, 0, -1)
         pre_download_counter = post_download_counter = 0
 
-        for act_url in activity_urls_list:
+        for activity_file_url_and_name_and_id in activity_file_urls_list:
             # We delete it from the redis list to avoid syncing a second time
             # For an strange reason we have to do :
             #       redis.lrem(key, value)
             # Even if redis, redis-py docs and the signature of the function in the container ask to do
             #       redis.lrem(key, count ,value)
-            result = redis.lrem(redis_key, act_url)
+            result = redis.lrem(redis_key, activity_file_url_and_name_and_id)
             if result == 0:
                 logger.warning("Cant delete the activity id from the redis key %s" % (redis_key))
             elif result > 1 :
                 logger.warning("Found more than one time the activity id from the redis key %s" % (redis_key))
+            
+            # Spliting the URL from the Activity Name
+            decoded_activity_file_url_and_name_and_id = activity_file_url_and_name_and_id.decode('UTF-8')
+            activity_file_url = decoded_activity_file_url_and_name_and_id.split("::")[0]
+            activity_file_name = decoded_activity_file_url_and_name_and_id.split("::")[1]
+            activity_id = decoded_activity_file_url_and_name_and_id.split("::")[2]
 
-            resp = oauthSession.get(act_url)
-
+            # Downlaoding the activity fit file
+            resp = oauthSession.get(activity_file_url)
             if resp.status_code != 204 and resp.status_code != 200:
                 logger.info("\tAn error occured while downloading Garmin Health activity, status code %s, content %s" % (
                     (str(resp.status_code), resp.content)))
+            else:
+                pre_download_counter += 1
+                activity = FITIO.Parse(resp.content)
+                activity.Name = activity_file_name
 
-            try:
-                json_data = resp.json()
-            except ValueError:
-                raise APIException("Failed parsing Garmin Health response %s - %s" % (resp.status_code, resp.text), trigger_exhaustive=False)
-
-            item = json_data[0].get("summary")
-            itemID = json_data[0].get("summaryId")[:-7]
-
-            pre_download_counter += 1
-            activity = UploadedActivity()
-            activity.Name = item['activityType'] + " - " + item['deviceName'] if item['deviceName'] != 'unknown' else item['activityType']
-
-            # parse date start to get timezone and date
-            activity.TZ = pytz.utc
-            activity.StartTime = datetime.utcfromtimestamp(item['startTimeInSeconds'])
-            activity.EndTime = activity.StartTime + timedelta(seconds=item["durationInSeconds"])
-            logger.debug("\tActivity start s/t %s: %s" % (activity.StartTime, activity.Name))
-
-            activity.ServiceData = {"ActivityID": itemID}
-            activity.ServiceData['Manual'] = "manual" in item
-            activity.ServiceData['DownloadURI'] = act_url
-
-            # check if activity type ID exists
-            logger.info("\tActivity Type Garmin : " + str(item["activityType"]) + " - user_id " + svcRecord.ExternalID )
-            if item["activityType"] not in self._reverseActivityTypeMappings:
-                # TODO : Uncomment it when test are done
-                #exclusions.append(
-                #    APIExcludeActivity("Unsupported activity type %s" % item["activityType"],
-                #                       activity_id=item["summaryId"],
-                #                       user_exception=UserException(UserExceptionType.Other)))
-                logger.info("\t\tUnknown activity")
-                continue
-
-            activity.Type = self._reverseActivityTypeMappings[item["activityType"]]
-
-            activity.Stats.Distance = ActivityStatistic(ActivityStatisticUnit.Meters, value=item.get("distanceInMeters"))
-            activity.Stats.Speed = ActivityStatistic(
-                ActivityStatisticUnit.MetersPerSecond,
-                avg=item.get("averageSpeedInMetersPerSecond"),
-                max=item.get("maxSpeedInMetersPerSecond")
-            )
-
-            activity.Stats.MovingTime = ActivityStatistic(ActivityStatisticUnit.Seconds, value=item.get("movingDurationInSeconds"))
-            activity.Stats.Power = ActivityStatistic(ActivityStatisticUnit.Watts,avg=item.get("powerInWatts"))
-            activity.Stats.HR = ActivityStatistic(
-                ActivityStatisticUnit.BeatsPerMinute,
-                avg=item.get("averageHeartRateInBeatsPerMinute"),
-                max=item.get("maxHeartRateInBeatsPerMinute"))
-
-            activity.Stats.Cadence = ActivityStatistic(
-                ActivityStatisticUnit.RevolutionsPerMinute,
-                avg=item.get("averageBikeCadenceInRoundsPerMinute"),
-                max=item.get("maxBikeCadenceInRoundsPerMinute"))
-
-            activity.Stats.RunCadence = ActivityStatistic(
-                ActivityStatisticUnit.StepsPerMinute,
-                avg=item.get("averageRunCadenceInStepsPerMinute"),
-                max=item.get("maxRunCadenceInStepsPerMinute"))
-            
-            # TODO: See if temperature should be body temperature or air temperature
-            #       Because Garmin provides "airTemperatureCelcius" in data
-            # if "average_temp" in ride:
-            #    activity.Stats.Temperature.update(
-            #        ActivityStatistic(ActivityStatisticUnit.DegreesCelcius, avg=ride["average_temp"]))
-
-            activity.Stats.Energy = ActivityStatistic(ActivityStatisticUnit.Kilocalories, value=item.get("activeKilocalories"))
-            activity.Stationary = not "startingLatitudeInDegree" in item
-            activity.GPS = "startingLatitudeInDegree" in item
-
-            activity.AdjustTZ()
-            activity.CalculateUID()
-            post_download_counter += 1
-            activities.append(activity)
-            logger.info("\tGarmin Activity ID : " + itemID)
+                activity.AdjustTZ()
+                activity.CalculateUID()
+                post_download_counter += 1
+                activities.append(activity)
+                logger.info("\tGarmin Activity ID : " + activity_id)
 
         logger.info("\t\t total Garmin activities downloaded : %i" % pre_download_counter)
-        logger.info("\t\t\t Listed activities by redis : %i" % len(activity_urls_list))
+        logger.info("\t\t\t Listed activities by redis : %i" % len(activity_file_urls_list))
         logger.info("\t\t\t Number of activities passed though download : %i" % post_download_counter)
         return activities, exclusions
 
     def DownloadActivity(self, svcRecord, activity):
-        oauthSession = self._oauthSession(svcRecord)
-        resp = oauthSession.get(activity.ServiceData["DownloadURI"])
-
-        if resp.status_code != 204 and resp.status_code != 200:
-            logging.info("\t An error occured while downloading Garmin Health activities from %s to %s " % (
-                    (datetime.now()-timedelta(days=1)).strftime('%s'), datetime.now().strftime('%s')))
-
-        json_data = resp.json()
-        activity_id = activity.ServiceData["ActivityID"]
-        activity_detail_id = activity_id + '-detail'
-        if json_data:
-            for item in json_data:
-                if activity_detail_id == item['summaryId']:
-                    lapsdata = []
-
-                    if "laps" in item:
-                        for lap in item['laps']:
-                            lapsdata.append(lap['startTimeInSeconds'])
-
-                    ridedata = {}
-                    lapWaypoints = []
-                    startTimeLap = activity.StartTime
-                    endTimeLap = activity.EndTime
-
-                    if "samples" in item:
-                        activity.GPS = True
-                        activity.Stationary = False
-                        for pt in item['samples']:
-                            wp = Waypoint()
-
-                            delta = int(pt.get('clockDurationInSeconds'))
-                            dateStartPoint = int(pt.get('startTimeInSeconds'))
-                            dateStartPointDt = datetime.utcfromtimestamp(dateStartPoint)
-
-                            wp.Timestamp = dateStartPointDt
-
-                            wp.Location = Location()
-                            if "latitudeInDegree" in pt:
-                                wp.Location.Latitude = float(pt.get('latitudeInDegree'))
-                            if "longitudeInDegree" in pt:
-                                wp.Location.Longitude = float(pt.get('longitudeInDegree'))
-                            if "elevationInMeters" in pt:
-                                wp.Location.Altitude = int(pt.get('elevationInMeters'))
-
-                            if "totalDistanceInMeters" in pt:
-                                wp.Distance = int(pt.get('totalDistanceInMeters'))
-
-                            if "speedMetersPerSecond" in pt:
-                                wp.Speed = int(pt.get('speedMetersPerSecond'))
-
-                            if "heartRate" in pt:
-                                wp.HR = int(pt.get('heartRate'))
-
-                            # current sample is = to lap occur , so store current nap and build a new one
-                            if dateStartPoint in lapsdata:
-
-                                lap = Lap(stats=activity.Stats, startTime=startTimeLap, endTime=dateStartPointDt)
-                                lap.Waypoints = lapWaypoints
-                                activity.Laps.append(lap)
-                                # re init a new lap
-                                startTimeLap = datetime.utcfromtimestamp(dateStartPoint)
-                                lapWaypoints = []
-                            # add occur
-                            lapWaypoints.append(wp)
-
-                        # build last lap
-                        if len(lapWaypoints) > 0:
-                            lap = Lap(stats=activity.Stats, startTime=startTimeLap, endTime=endTimeLap)
-                            lap.Waypoints = lapWaypoints
-                            activity.Laps.append(lap)
-                    else:
-                        activity.Laps = [Lap(startTime=activity.StartTime, endTime=activity.EndTime, stats=activity.Stats)]
-                        logger.info("\t\tGarmin no laps, full laps")
-
-
-                    break
-
-        if len(activity.Laps) == 0 :
-            activity.Stationary = True
-            activity.GPS = False
-            activity.Laps = [Lap(startTime=activity.StartTime, endTime=activity.EndTime, stats=activity.Stats)]
         return activity
 
     # Garmin Health is on read only access, we can't upload activities
@@ -409,13 +260,14 @@ class GarminHealthService(ServiceBase):
         logger.info("GARMIN CALLBACK POKE")
         # Get user ids to sync
         external_user_ids = []
-        if data.get('activityDetails') != None :
-            for activity in data['activityDetails']:
+        if data.get('activityFiles') != None:
+            for activity in data['activityFiles']:
                 # Pushing the callback url in redis that will be used in downloadActivityList
-                redis.rpush("garminhealth:webhook:%s" % activity['userId'], activity["callbackURL"])
+                redis.rpush("garminhealth:webhook:%s" % activity['userId'], activity["callbackURL"]+"::"+activity["activityName"]+"::"+str(activity["activityId"]))
                 external_user_ids.append(activity['userId'])
                 logging.info("\tGARMIN CALLBACK user to sync "+ activity['userId'])
 
         return external_user_ids
+
 
 
