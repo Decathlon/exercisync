@@ -39,7 +39,8 @@ function ActivitiesController($scope, $http) {
       "tz_unknown": "The time zone of this activity could not be determined.",
       "system": "There was a system error while synchronizing this activity.",
       "other": "There was an error while synchronizing this activity or this service does not support upload",
-      "unknown": "Your guess is as good as mine."
+      "unknown": "Your guess is as good as mine.",
+      "could_be_external_sync": "Services with direct synchronisation (ie : Strava and Garmin) are no longer supported as it could provoke duplicates"
     };
     return explanations[type].replace(/%\(service\)/g, $scope.DisplayNameByService(presc.Service));
   };

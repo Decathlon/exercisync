@@ -75,6 +75,7 @@ class UserExceptionType:
     UnknownTZ = "tz_unknown"
     System = "system"
     Other = "other"
+    CouldBeExternalSync = "could_be_external_sync"
 
 class UserException:
     def __init__(self, type, extra=None, intervention_required=False, clear_group=None):

@@ -501,12 +501,18 @@ class SynchronizationTask:
 
     def _determineRecipientServices(self, activity):
         recipientServices = []
+        # We are getting the name of service wich the activity is from
+        activity_origin_svc_name = next((svc.Service.ID for svc in self._serviceConnections if {svc._id} & activity.ServiceDataCollection.keys()))
         for conn in self._serviceConnections:
             if not conn.Service.ReceivesActivities:
                 # Nope.
                 continue
             if conn._id in activity.ServiceDataCollection:
                 # The activity record is updated earlier for these, blegh.
+                continue
+            if activity_origin_svc_name != "decathlon" and conn.Service.ID == "strava":
+                # We don't want services other than Decathlon to send activties to Strava
+                activity.Record.MarkAsNotPresentOn(conn, UserException(UserExceptionType.CouldBeExternalSync))
                 continue
             elif hasattr(conn, "SynchronizedActivities") and len([x for x in activity.UIDs if x in conn.SynchronizedActivities]):
                 continue
