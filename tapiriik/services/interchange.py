@@ -730,3 +730,45 @@ class Location:
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+class LengthType:
+    Idle = 0
+    Active = 1
+
+class SwimmingStroke:
+    Freestyle = 0
+    Backstroke = 1
+    Breaststroke = 2
+    Butterfly = 3
+    Drill = 4
+    Mixed = 5
+    Im = 6 #IM is a mixed interval containing the same number of lengths for each of: Butterfly, Backstroke, Breaststroke, Freestyle, swam in that order.
+
+class SwimmingLength:
+    def __init__(self, startTime, endTime, lengthType=LengthType.Active, swimmingStroke=SwimmingStroke.Freestyle, stats=None, waypointList=[]) -> None:
+        self.StartTime = startTime
+        self.EndTime = endTime
+        self.Type = lengthType
+        self.SwimmingStroke = swimmingStroke
+        self.Stats = stats if stats else ActivityStatistics()
+        self.Waypoints = waypointList
+        pass
+
+    # The goal of this property is to make tapiriil think a length has the same behavior as a Lap
+    @property
+    def Intensity(self):
+        return self.Type
+
+    @property
+    def Trigger(self):
+        return LapTriggerMethod.Manual
+
+    def asdict(self):
+        return {
+            "StartTime": self.StartTime,
+            "EndTime": self.EndTime,
+            "LengthType": self.Type,
+            "SwimmingStroke": self.SwimmingStroke,
+            "Stats": self.Stats.asdict(),
+            "Waypoints": [wp.asdict() for wp in self.Waypoints]
+        }

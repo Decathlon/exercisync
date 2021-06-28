@@ -5,7 +5,7 @@ from tapiriik.services.ratelimiting import RateLimit, RateLimitExceededException
 from tapiriik.services.service_base import ServiceAuthenticationType, ServiceBase
 from tapiriik.services.service_record import ServiceRecord
 from tapiriik.database import cachedb
-from tapiriik.services.interchange import UploadedActivity, ActivityType, ActivityStatistic, ActivityStatisticUnit, Waypoint, WaypointType, Location, Lap
+from tapiriik.services.interchange import LengthType, SwimmingLength, SwimmingStroke, UploadedActivity, ActivityType, ActivityStatistic, ActivityStatisticUnit, Waypoint, WaypointType, Location, Lap
 from tapiriik.services.api import APIException, UserException, UserExceptionType, APIExcludeActivity, ServiceException
 from tapiriik.database import db, redis
 
@@ -436,61 +436,73 @@ class DecathlonService(ServiceBase):
             lap = Lap(stats=activity.Stats, startTime=activity.StartTime, endTime=activity.EndTime)
             activity.Laps = [lap]
         else :
-            lapWaypoints = []
-            startTimeLap = activity.StartTime
-            for elapsedTime in ridedataindex:
-                rd = ridedata[elapsedTime]
-                wp = Waypoint()
-                delta = elapsedTime
-                formatedDate = datebase + timedelta(seconds=delta)
-                wp.Timestamp = formatedDate#self._parseDate(formatedDate.isoformat())
+            if activity.Type == ActivityType.Swimming:
+                cpt = 0
+                for elapsedTime in ridedataindex:
+                    activity.Laps.append(SwimmingLength(
+                        startTime=activity.StartTime if len(activity.Laps) == 0 else activity.Laps[len(activity.Laps)-1].EndTime,
+                        endTime=activity.EndTime if len(activity.Laps) == len(ridedataindex)-1 else activity.StartTime + timedelta(seconds=int(elapsedTime)),
+                        lengthType=LengthType.Active,
+                        swimmingStroke=SwimmingStroke.Freestyle,
+                        waypointList=[Waypoint(timestamp=(activity.EndTime if len(activity.Laps) == len(ridedataindex)-1 else activity.StartTime + timedelta(seconds=int(elapsedTime))), distance=cpt*50)]
+                    ))
+                    cpt += 1
+            else :
+                lapWaypoints = []
+                startTimeLap = activity.StartTime
+                for elapsedTime in ridedataindex:
+                    rd = ridedata[elapsedTime]
+                    wp = Waypoint()
+                    delta = elapsedTime
+                    formatedDate = datebase + timedelta(seconds=delta)
+                    wp.Timestamp = formatedDate#self._parseDate(formatedDate.isoformat())
 
-                if 'LATITUDE' in rd :
-                    wp.Location = Location()
-                    wp.Location.Latitude = rd['LATITUDE']
-                    wp.Location.Longitude = rd['LONGITUDE']
-                    wp.Location.Altitude = rd['ELEVATION']
+                    if 'LATITUDE' in rd :
+                        wp.Location = Location()
+                        wp.Location.Latitude = rd['LATITUDE']
+                        wp.Location.Longitude = rd['LONGITUDE']
+                        wp.Location.Altitude = rd['ELEVATION']
 
-                if 'HR' in rd :
-                    wp.HR = rd['HR']
+                    if 'HR' in rd :
+                        wp.HR = rd['HR']
 
-                if 'SPEED' in rd :
-                    if rd['SPEED'] < 100000 :
-                        wp.Speed = round(rd['SPEED'] / 3600, 2)
+                    if 'SPEED' in rd :
+                        if rd['SPEED'] < 100000 :
+                            wp.Speed = round(rd['SPEED'] / 3600, 2)
 
-                if 'DISTANCE' in rd :
-                    wp.Distance = rd['DISTANCE']
+                    if 'DISTANCE' in rd :
+                        wp.Distance = rd['DISTANCE']
 
-                if 'CADENCE' in rd :
-                    wp.Cadence = rd['CADENCE']
+                    if 'CADENCE' in rd :
+                        wp.Cadence = rd['CADENCE']
 
-                if 'R_CADENCE' in rd :
-                     wp.RunCadence = rd['R_CADENCE']
+                    if 'R_CADENCE' in rd :
+                        wp.RunCadence = rd['R_CADENCE']
 
-                if 'POWER' in rd :
-                    wp.Power = rd['POWER']
+                    if 'POWER' in rd :
+                        wp.Power = rd['POWER']
 
-                lapWaypoints.append(wp)
+                    lapWaypoints.append(wp)
 
-                if "LAP" in rd :
-                    #build the lap
-                    # No statistic added because we don't have a way to effectively get them
-                    lap = Lap(startTime = startTimeLap, endTime = formatedDate)
+                    if "LAP" in rd :
+                        #build the lap
+                        # No statistic added because we don't have a way to effectively get them
+                        lap = Lap(startTime = startTimeLap, endTime = formatedDate)
+                        lap.Waypoints = lapWaypoints
+                        activity.Laps.append(lap)
+                        # re init a new lap
+                        startTimeLap = formatedDate
+                        lapWaypoints = []
+
+                #build last lap
+                if len(lapWaypoints)>0 :
+                    lap = Lap(startTime = startTimeLap, endTime = formatedDate) 
                     lap.Waypoints = lapWaypoints
                     activity.Laps.append(lap)
-                    # re init a new lap
-                    startTimeLap = formatedDate
-                    lapWaypoints = []
 
-            #build last lap
-            if len(lapWaypoints)>0 :
-                lap = Lap(startTime = startTimeLap, endTime = formatedDate) 
-                lap.Waypoints = lapWaypoints
-                activity.Laps.append(lap)
-
-            # avoiding 1 laps stats mismatch
-            if len(activity.Laps) == 1:
-                activity.Laps[0].Stats = activity.Stats
+                # avoiding 1 laps stats mismatch
+                if len(activity.Laps) == 1:
+                    activity.Laps[0].Stats = activity.Stats
 
         return activity
 
