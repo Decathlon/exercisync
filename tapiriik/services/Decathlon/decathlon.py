@@ -1,12 +1,13 @@
 # Synchronization module for decathloncoach.com
 # (c) 2018 Charles Anssens, charles.anssens@decathlon.com
-from tapiriik.settings import WEB_ROOT, DECATHLON_CLIENT_SECRET, DECATHLON_CLIENT_ID, DECATHLON_OAUTH_URL, DECATHLON_API_KEY, DECATHLON_API_BASE_URL, DECATHLON_RATE_LIMITS, DECATHLON_LOGIN_CLIENT_SECRET, DECATHLON_LOGIN_CLIENT_ID, DECATHLON_LOGIN_OAUTH_URL, DECATHLON_HUB_CONNECTOR_ID
+from tapiriik.settings import WEB_ROOT, DECATHLON_CLIENT_SECRET, DECATHLON_CLIENT_ID, DECATHLON_OAUTH_URL, DECATHLON_API_KEY, DECATHLON_API_BASE_URL, DECATHLON_RATE_LIMITS, DECATHLON_LOGIN_CLIENT_SECRET, DECATHLON_LOGIN_CLIENT_ID, DECATHLON_LOGIN_OAUTH_URL, DECATHLON_HUB_CONNECTOR_ID, DECATHLON_FIT_DOWNLOAD_HEX_CHAR_FILTER
 from tapiriik.services.ratelimiting import RateLimit, RateLimitExceededException, RedisRateLimit
 from tapiriik.services.service_base import ServiceAuthenticationType, ServiceBase
 from tapiriik.services.service_record import ServiceRecord
 from tapiriik.database import cachedb
 from tapiriik.services.interchange import UploadedActivity, ActivityType, ActivityStatistic, ActivityStatisticUnit, Waypoint, WaypointType, Location, Lap
 from tapiriik.services.api import APIException, UserException, UserExceptionType, APIExcludeActivity, ServiceException
+from tapiriik.services.fit import FITIO
 from tapiriik.database import db, redis
 
 from django.core.urlresolvers import reverse
@@ -375,126 +376,142 @@ class DecathlonService(ServiceBase):
 
     def DownloadActivity(self, svcRecord, activity):
         activityID = activity.ServiceData["ActivityID"]
-
-        logging.info("\t\t DC LOADING  : " + str(activityID))
-
         headers = self._getAuthHeaders(svcRecord)
-        resp = requests.get(DECATHLON_API_BASE_URL + "/v2/activities/" + activityID , headers=headers)
 
-        if resp.status_code == 401:
-            raise APIException("No authorization to download activity", block = True, user_exception = UserException(UserExceptionType.Authorization, intervention_required = True))
+        from tapiriik.auth import User
+        lastUidChar = str(User.GetByConnection(svcRecord)["id"])[-1]
 
-        try:
-            root = json.loads(resp.content.decode('utf-8'))
-        except:
-            raise APIException("Stream data returned from Decathlon is not JSON")
+        # Ensuring all is lowercased because "F" < "a"
+        #       But "a" < "f"
+        if lastUidChar.lower() <= DECATHLON_FIT_DOWNLOAD_HEX_CHAR_FILTER.lower():
+            logging.info("\t\t DC FIT LOADING : " + str(activityID))
+            headers.update({'Accept' : 'application/octet-stream'})
 
-        activity.GPS = False
-        activity.Stationary = True
-        #work on date
-        datebase = activity.StartTime
+            resp = requests.get(DECATHLON_API_BASE_URL + "/v2/activities/" + activityID + ".fit" , headers=headers)
+            if resp.status_code == 401:
+                raise APIException("No authorization to download activity", block = True, user_exception = UserException(UserExceptionType.Authorization, intervention_required = True))
 
-        ridedata = {}
-        ridedataindex = []
+            activity = FITIO.Parse(resp.content, activity)
+        
+        else:
+            logging.info("\t\t DC LOADING  : " + str(activityID))
 
-        if "locations" in root and root["locations"] is not None:
-            for pt in root["locations"]:
-                delta = int(float(pt))
-                ridedataindex.append(delta)
-                ridedata[delta] = {}
-                ridedata[delta]['LATITUDE'] = float(root["locations"][pt]["latitude"])
-                ridedata[delta]['LONGITUDE'] = float(root["locations"][pt]["longitude"])
-                ridedata[delta]['ELEVATION'] = int(root["locations"][pt]["elevation"])
-            
-        if len(ridedata)>0 :
-            activity.GPS = True
-            activity.Stationary = False
+            resp = requests.get(DECATHLON_API_BASE_URL + "/v2/activities/" + activityID , headers=headers)
 
-        if "datastream" in root and root["datastream"] is not None:
-            for measure in root["datastream"]:
-                delta = int(float(measure))
-                if delta not in ridedataindex :
+            if resp.status_code == 401:
+                raise APIException("No authorization to download activity", block = True, user_exception = UserException(UserExceptionType.Authorization, intervention_required = True))
+
+            try:
+                root = json.loads(resp.content.decode('utf-8'))
+            except:
+                raise APIException("Stream data returned from Decathlon is not JSON")
+
+            activity.GPS = False
+            activity.Stationary = True
+            #work on date
+            datebase = activity.StartTime
+
+            ridedata = {}
+            ridedataindex = []
+
+            if "locations" in root and root["locations"] is not None:
+                for pt in root["locations"]:
+                    delta = int(float(pt))
                     ridedataindex.append(delta)
                     ridedata[delta] = {}
+                    ridedata[delta]['LATITUDE'] = float(root["locations"][pt]["latitude"])
+                    ridedata[delta]['LONGITUDE'] = float(root["locations"][pt]["longitude"])
+                    ridedata[delta]['ELEVATION'] = int(root["locations"][pt]["elevation"])
+                
+            if len(ridedata)>0 :
+                activity.GPS = True
+                activity.Stationary = False
 
-                if "5" in root["datastream"][measure]:
-                    ridedata[delta]['DISTANCE'] = int(root["datastream"][measure]["5"])
-                if "1" in root["datastream"][measure]:
-                    ridedata[delta]['HR'] = int(root["datastream"][measure]["1"])
-                if "6" in root["datastream"][measure]:
-                    ridedata[delta]['SPEED'] = int(root["datastream"][measure]["6"])
-                if self._unitMap["cadence"] in root["datastream"][measure]:
-                    ridedata[delta]['R_CADENCE'] = int(root["datastream"][measure]["10"])
-                if self._unitMap["rpm"] in root["datastream"][measure]:
-                    ridedata[delta]['CADENCE'] = int(root["datastream"][measure]["100"])
-                if "178" in root["datastream"][measure]:
-                    ridedata[delta]["POWER"] = int(root["datastream"][measure]["178"])
-                if "20" in root["datastream"][measure]:
-                    ridedata[delta]['LAP'] = int(root["datastream"][measure]["20"])
+            if "datastream" in root and root["datastream"] is not None:
+                for measure in root["datastream"]:
+                    delta = int(float(measure))
+                    if delta not in ridedataindex :
+                        ridedataindex.append(delta)
+                        ridedata[delta] = {}
 
-        ridedataindex.sort()
+                    if "5" in root["datastream"][measure]:
+                        ridedata[delta]['DISTANCE'] = int(root["datastream"][measure]["5"])
+                    if "1" in root["datastream"][measure]:
+                        ridedata[delta]['HR'] = int(root["datastream"][measure]["1"])
+                    if "6" in root["datastream"][measure]:
+                        ridedata[delta]['SPEED'] = int(root["datastream"][measure]["6"])
+                    if self._unitMap["cadence"] in root["datastream"][measure]:
+                        ridedata[delta]['R_CADENCE'] = int(root["datastream"][measure]["10"])
+                    if self._unitMap["rpm"] in root["datastream"][measure]:
+                        ridedata[delta]['CADENCE'] = int(root["datastream"][measure]["100"])
+                    if "178" in root["datastream"][measure]:
+                        ridedata[delta]["POWER"] = int(root["datastream"][measure]["178"])
+                    if "20" in root["datastream"][measure]:
+                        ridedata[delta]['LAP'] = int(root["datastream"][measure]["20"])
+
+            ridedataindex.sort()
 
 
-        if len(ridedata) == 0 :
-            lap = Lap(stats=activity.Stats, startTime=activity.StartTime, endTime=activity.EndTime)
-            activity.Laps = [lap]
-        else :
-            lapWaypoints = []
-            startTimeLap = activity.StartTime
-            for elapsedTime in ridedataindex:
-                rd = ridedata[elapsedTime]
-                wp = Waypoint()
-                delta = elapsedTime
-                formatedDate = datebase + timedelta(seconds=delta)
-                wp.Timestamp = formatedDate#self._parseDate(formatedDate.isoformat())
+            if len(ridedata) == 0 :
+                lap = Lap(stats=activity.Stats, startTime=activity.StartTime, endTime=activity.EndTime)
+                activity.Laps = [lap]
+            else :
+                lapWaypoints = []
+                startTimeLap = activity.StartTime
+                for elapsedTime in ridedataindex:
+                    rd = ridedata[elapsedTime]
+                    wp = Waypoint()
+                    delta = elapsedTime
+                    formatedDate = datebase + timedelta(seconds=delta)
+                    wp.Timestamp = formatedDate#self._parseDate(formatedDate.isoformat())
 
-                if 'LATITUDE' in rd :
-                    wp.Location = Location()
-                    wp.Location.Latitude = rd['LATITUDE']
-                    wp.Location.Longitude = rd['LONGITUDE']
-                    wp.Location.Altitude = rd['ELEVATION']
+                    if 'LATITUDE' in rd :
+                        wp.Location = Location()
+                        wp.Location.Latitude = rd['LATITUDE']
+                        wp.Location.Longitude = rd['LONGITUDE']
+                        wp.Location.Altitude = rd['ELEVATION']
 
-                if 'HR' in rd :
-                    wp.HR = rd['HR']
+                    if 'HR' in rd :
+                        wp.HR = rd['HR']
 
-                if 'SPEED' in rd :
-                    if rd['SPEED'] < 100000 :
-                        wp.Speed = round(rd['SPEED'] / 3600, 2)
+                    if 'SPEED' in rd :
+                        if rd['SPEED'] < 100000 :
+                            wp.Speed = round(rd['SPEED'] / 3600, 2)
 
-                if 'DISTANCE' in rd :
-                    wp.Distance = rd['DISTANCE']
+                    if 'DISTANCE' in rd :
+                        wp.Distance = rd['DISTANCE']
 
-                if 'CADENCE' in rd :
-                    wp.Cadence = rd['CADENCE']
+                    if 'CADENCE' in rd :
+                        wp.Cadence = rd['CADENCE']
 
-                if 'R_CADENCE' in rd :
-                    # Here we want the RunCadence to be a batch of 1 left and 1 right step (As the fit ask to)
-                     wp.RunCadence = rd['R_CADENCE']/2
+                    if 'R_CADENCE' in rd :
+                        # Here we want the RunCadence to be a batch of 1 left and 1 right step (As the fit ask to)
+                        wp.RunCadence = rd['R_CADENCE']/2
 
-                if 'POWER' in rd :
-                    wp.Power = rd['POWER']
+                    if 'POWER' in rd :
+                        wp.Power = rd['POWER']
 
-                lapWaypoints.append(wp)
+                    lapWaypoints.append(wp)
 
-                if "LAP" in rd :
-                    #build the lap
-                    # No statistic added because we don't have a way to effectively get them
-                    lap = Lap(startTime = startTimeLap, endTime = formatedDate)
+                    if "LAP" in rd :
+                        #build the lap
+                        # No statistic added because we don't have a way to effectively get them
+                        lap = Lap(startTime = startTimeLap, endTime = formatedDate)
+                        lap.Waypoints = lapWaypoints
+                        activity.Laps.append(lap)
+                        # re init a new lap
+                        startTimeLap = formatedDate
+                        lapWaypoints = []
+
+                #build last lap
+                if len(lapWaypoints)>0 :
+                    lap = Lap(startTime = startTimeLap, endTime = formatedDate) 
                     lap.Waypoints = lapWaypoints
                     activity.Laps.append(lap)
-                    # re init a new lap
-                    startTimeLap = formatedDate
-                    lapWaypoints = []
 
-            #build last lap
-            if len(lapWaypoints)>0 :
-                lap = Lap(startTime = startTimeLap, endTime = formatedDate) 
-                lap.Waypoints = lapWaypoints
-                activity.Laps.append(lap)
-
-            # avoiding 1 laps stats mismatch
-            if len(activity.Laps) == 1:
-                activity.Laps[0].Stats = activity.Stats
+                # avoiding 1 laps stats mismatch
+                if len(activity.Laps) == 1:
+                    activity.Laps[0].Stats = activity.Stats
 
         return activity
 
