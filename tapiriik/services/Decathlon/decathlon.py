@@ -379,7 +379,7 @@ class DecathlonService(ServiceBase):
         headers = self._getAuthHeaders(svcRecord)
 
         from tapiriik.auth import User
-        lastUidChar = str(User.GetByConnection(svcRecord)["id"])[-1]
+        lastUidChar = str(User.GetByConnection(svcRecord)["_id"])[-1]
 
         # Ensuring all is lowercased because "F" < "a"
         #       But "a" < "f"
