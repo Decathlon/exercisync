@@ -76,6 +76,10 @@ TRAININGPEAKS_CLIENT_SCOPE = "cats:cuddle dogs:throw-frisbee"
 TRAININGPEAKS_API_BASE_URL = "https://api.trainingpeaks.com"
 TRAININGPEAKS_OAUTH_BASE_URL = "https://oauth.trainingpeaks.com"
 
+# Param to filter on the last hex char of user _id
+#       every (user _id with the last hex char <= DECATHLON_FIT_DOWNLOAD_HEX_CHAR_FILTER) will be using the fit parse from STD downloadActivity
+DECATHLON_FIT_DOWNLOAD_HEX_CHAR_FILTER = "a"
+
 DECATHLON_CLIENT_SECRET = "####"
 DECATHLON_CLIENT_ID = "####"
 DECATHLON_OAUTH_URL = "####"
