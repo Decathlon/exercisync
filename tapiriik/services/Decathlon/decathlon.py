@@ -418,7 +418,6 @@ class DecathlonService(ServiceBase):
 
                     activity.Device = Device(
                         manufacturer=deviceManufacturerName,
-                        # If there is a product we take it else we take the garmin_product or None
                         product=deviceModel
                     )
 
