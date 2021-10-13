@@ -405,25 +405,31 @@ class DecathlonService(ServiceBase):
 
             #   resp OK
             if deviceResponse.status_code == 200:
-                currentActivityDevice = json.loads(deviceResponse.content.decode('utf-8'))
-                logging.info("Device " + str(currentActivityDevice))
-
-                # 2 cas : fitManufacturer et fitDevice null -> valeurs par defaut
-                deviceManufacturer = currentActivityDevice["fitManufacturer"]
-                deviceModel = None
+                try: 
+                    currentActivityDevice = json.loads(deviceResponse.content.decode('utf-8'))
                 
-                if deviceManufacturer is None:
-                    deviceManufacturer = 310
-                    deviceModelLocation = currentActivityDevice["model"]
-                    deviceModel = re.match(r"\d+$", deviceModelLocation)
-                else:
-                    deviceModel= currentActivityDevice["fitDevice"]
+                    logging.info("Device " + str(currentActivityDevice))
 
-                activity.Device = Device(
-				    manufacturer=deviceManufacturer,
-				    # If there is a product we take it else we take the garmin_product or None
-				    product=deviceModel
-		        )
+                    # 2 cas : fitManufacturer et fitDevice null -> valeurs par defaut
+                    deviceManufacturer = currentActivityDevice["fitManufacturer"]
+                    deviceModel = None
+                    
+                    if deviceManufacturer is None:
+                        deviceManufacturer = 310
+                        deviceModelLocation = currentActivityDevice["model"]
+                        deviceModel = re.match(r"\d+$", deviceModelLocation)
+                    else:
+                        deviceModel= currentActivityDevice["fitDevice"]
+
+                    activity.Device = Device(
+                        manufacturer=deviceManufacturer,
+                        # If there is a product we take it else we take the garmin_product or None
+                        product=deviceModel
+                    )
+                    
+                except:
+                    logging.info("Device fetch failed for activity " + str(activityID) + " at " + str(deviceLocation))
+
             # error when fetching device from std
             else:
                 logging.info("Device fetch failed for activity " + str(activityID) + " at " + str(deviceLocation))
