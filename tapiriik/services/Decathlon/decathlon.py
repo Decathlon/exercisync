@@ -8,6 +8,7 @@ from tapiriik.database import cachedb
 from tapiriik.services.interchange import UploadedActivity, ActivityType, ActivityStatistic, ActivityStatisticUnit, Waypoint, WaypointType, Location, Lap
 from tapiriik.services.api import APIException, UserException, UserExceptionType, APIExcludeActivity, ServiceException
 from tapiriik.database import db, redis
+from tapiriik.services.devices import Device
 
 from django.core.urlresolvers import reverse
 from datetime import datetime, timedelta
@@ -379,6 +380,7 @@ class DecathlonService(ServiceBase):
         logging.info("\t\t DC LOADING  : " + str(activityID))
 
         headers = self._getAuthHeaders(svcRecord)
+        #  activity
         resp = requests.get(DECATHLON_API_BASE_URL + "/v2/activities/" + activityID , headers=headers)
 
         if resp.status_code == 401:
@@ -388,6 +390,43 @@ class DecathlonService(ServiceBase):
             root = json.loads(resp.content.decode('utf-8'))
         except:
             raise APIException("Stream data returned from Decathlon is not JSON")
+
+        # fetch devices if present
+        # mettre à jour la fonction downloadactivity du service decathlon,
+        # - si l'activité a un user device on le telecharge
+        # - on get les infos FIT (fit id , manufacturer id) si présente, sinon on met manufacturer = decathlon et device if = model id std
+        # - ces infos sont enregistrées dans le format pivot HUB
+        
+        # "userDevice": "/v2/user_devices/eu23218ff9b8010d294e",
+        deviceLocation = root["userDevice"]
+        if deviceLocation is not None:
+            # fetch device
+            deviceResponse = requests.get(DECATHLON_API_BASE_URL + deviceLocation , headers=headers)
+
+            #   resp OK
+            if deviceResponse.status_code == 200:
+                currentActivityDevice = json.loads(deviceResponse.content.decode('utf-8'))
+                logging.info("Device " + str(currentActivityDevice))
+
+                # 2 cas : fitManufacturer et fitDevice null -> valeurs par defaut
+                deviceManufacturer = currentActivityDevice["fitManufacturer"]
+                deviceModel = None
+                
+                if deviceManufacturer is None:
+                    deviceManufacturer = 310
+                    deviceModelLocation = currentActivityDevice["model"]
+                    deviceModel = re.match(r"\d+$", deviceModelLocation)
+                else:
+                    deviceModel= currentActivityDevice["fitDevice"]
+
+                activity.Device = Device(
+				    manufacturer=deviceManufacturer,
+				    # If there is a product we take it else we take the garmin_product or None
+				    product=deviceModel
+		        )
+            # error when fetching device from std
+            else:
+                logging.info("Device fetch failed for activity " + str(activityID) + " at " + str(deviceLocation))
 
         activity.GPS = False
         activity.Stationary = True
@@ -495,6 +534,8 @@ class DecathlonService(ServiceBase):
             # avoiding 1 laps stats mismatch
             if len(activity.Laps) == 1:
                 activity.Laps[0].Stats = activity.Stats
+
+
 
         return activity
 
