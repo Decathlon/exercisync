@@ -390,15 +390,8 @@ class DecathlonService(ServiceBase):
             root = json.loads(resp.content.decode('utf-8'))
         except:
             raise APIException("Stream data returned from Decathlon is not JSON")
-
-        # fetch devices if present
-        # mettre à jour la fonction downloadactivity du service decathlon,
-        # - si l'activité a un user device on le telecharge
-        # - on get les infos FIT (fit id , manufacturer id) si présente, sinon on met manufacturer = decathlon et device if = model id std
-        # - ces infos sont enregistrées dans le format pivot HUB
         
-        # "userDevice": "/v2/user_devices/eu23218ff9b8010d294e",
-        deviceLocation = root["userDevice"]
+        deviceLocation = root.get('userDevice')
         if deviceLocation is not None:
             # fetch device
             deviceResponse = requests.get(DECATHLON_API_BASE_URL + deviceLocation , headers=headers)
@@ -407,13 +400,11 @@ class DecathlonService(ServiceBase):
             if deviceResponse.status_code == 200:
                 try: 
                     currentActivityDevice = json.loads(deviceResponse.content.decode('utf-8'))
-                
-                    logging.info("Device " + str(currentActivityDevice))
 
                     # 2 cas : fitManufacturer et fitDevice null -> valeurs par defaut
                     deviceManufacturer = currentActivityDevice["fitManufacturer"]
                     deviceModel = None
-                    
+
                     if deviceManufacturer is None:
                         deviceManufacturer = 'decathlon'
                         deviceModelLocation = currentActivityDevice["model"]
