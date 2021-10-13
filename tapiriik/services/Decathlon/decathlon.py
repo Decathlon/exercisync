@@ -419,7 +419,7 @@ class DecathlonService(ServiceBase):
                         deviceModelLocation = currentActivityDevice["model"]
                         match = re.search(r'\d+$', deviceModelLocation)
                         if match:
-                            deviceModel=match.group(0)
+                            deviceModel=int(match.group(0))
                     else:
                         deviceModel= currentActivityDevice["fitDevice"]
 
