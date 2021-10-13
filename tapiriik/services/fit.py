@@ -802,6 +802,8 @@ class FITIO:
 
 		# As the keys are the IDs and not the names.
 		# So it is usefull to reverse keys and values
+		#add decathtlon manufacturer in list
+		FIELD_TYPES["manufacturer"].values[310] = "decathlon"
 		reversed_key_val_manufacturer = {FIELD_TYPES["manufacturer"].values[man_key]: man_key for man_key in FIELD_TYPES["manufacturer"].values.keys()}
 
 		if act.Device != None:
