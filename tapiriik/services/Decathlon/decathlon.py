@@ -9,6 +9,7 @@ from tapiriik.services.interchange import UploadedActivity, ActivityType, Activi
 from tapiriik.services.api import APIException, UserException, UserExceptionType, APIExcludeActivity, ServiceException
 from tapiriik.database import db, redis
 from tapiriik.services.devices import Device
+from fitparse.profile import FIELD_TYPES
 
 from django.core.urlresolvers import reverse
 from datetime import datetime, timedelta
@@ -402,20 +403,21 @@ class DecathlonService(ServiceBase):
                     currentActivityDevice = json.loads(deviceResponse.content.decode('utf-8'))
 
                     # 2 cas : fitManufacturer et fitDevice null -> valeurs par defaut
-                    deviceManufacturer = currentActivityDevice["fitManufacturer"]
+                    deviceManufacturerCode = currentActivityDevice["fitManufacturer"]
                     deviceModel = None
 
-                    if deviceManufacturer is None:
-                        deviceManufacturer = 'decathlon'
+                    if deviceManufacturerCode is None:
+                        deviceManufacturerName = 'decathlon'
                         deviceModelLocation = currentActivityDevice["model"]
                         match = re.search(r'\d+$', deviceModelLocation)
                         if match:
                             deviceModel=int(match.group(0))
                     else:
+                        deviceManufacturerName = FIELD_TYPES["manufacturer"].values.get(deviceManufacturerCode)
                         deviceModel= currentActivityDevice["fitDevice"]
 
                     activity.Device = Device(
-                        manufacturer=deviceManufacturer,
+                        manufacturer=deviceManufacturerName,
                         # If there is a product we take it else we take the garmin_product or None
                         product=deviceModel
                     )
