@@ -415,9 +415,11 @@ class DecathlonService(ServiceBase):
                     deviceModel = None
                     
                     if deviceManufacturer is None:
-                        deviceManufacturer = 310
+                        deviceManufacturer = 'decathlon'
                         deviceModelLocation = currentActivityDevice["model"]
-                        deviceModel = re.match(r"\d+$", deviceModelLocation)
+                        match = re.search(r'\d+$', deviceModelLocation)
+                        if match:
+                            deviceModel=match.group(0)
                     else:
                         deviceModel= currentActivityDevice["fitDevice"]
 
@@ -426,7 +428,7 @@ class DecathlonService(ServiceBase):
                         # If there is a product we take it else we take the garmin_product or None
                         product=deviceModel
                     )
-                    
+
                 except:
                     logging.info("Device fetch failed for activity " + str(activityID) + " at " + str(deviceLocation))
 
