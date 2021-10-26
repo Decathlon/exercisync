@@ -17,5 +17,7 @@
 
 # [Development install](070-development.md)
 
+# [Perf testing](090-perftest.md)
+
 # [Scripts summary](scripts/000-script-summary.md)
 # [Datamodel summary](datamodel/000-datamodel-summary.md)
