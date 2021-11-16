@@ -201,6 +201,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'tapiriik.web.context_processors.device_support',
     'tapiriik.web.context_processors.background_use',
     'tapiriik.web.context_processors.vue_link',
+    'tapiriik.web.context_processors.decat_club_env_link',
     'tapiriik.web.context_processors.is_user_from_dkt_club',
     'django.core.context_processors.static',
     'django.core.context_processors.request',
