@@ -127,6 +127,12 @@ button#sync-now-btn[disabled] span {
     animation: load8 infinite linear 1.1s
 }
 
+.tooltip-icon{
+    height: 12px;
+    width: 12px;
+    margin-right: 4px;
+}
+
 .round-icon{
     border-radius: 12px;
     height: 20px;
@@ -265,11 +271,20 @@ ul {
     // The .service-list ul>li
     &.services-list {
         & li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            & div.service-line {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
 
-            @extend .vtmn-pb-4;
+                @extend .vtmn-pb-4;
+            }
+
+            & div.dkt-club-tooltip {
+                background-color: var(--vtmn-base-color_grey100);
+                padding: 8px 24px 8px 10px;
+            }
+            // & small.dkt-club-tooltip {
+            // }
         }
     }
 

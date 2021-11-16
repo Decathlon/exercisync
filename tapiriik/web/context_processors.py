@@ -6,6 +6,7 @@ from tapiriik.database import db
 from datetime import datetime
 from random import randint
 import json
+import logging
 
 def providers(req):
     return {"service_providers": Service.List()}
@@ -102,6 +103,20 @@ def device_support(req):
             if req.GET['mobile'] is True or req.GET['mobile'] == 1 or req.GET['mobile'] == '1' or req.GET['mobile'] == 'true':
                 device_support = 'mobile'
     return {"device_support": device_support}
+
+
+def is_user_from_dkt_club(req):
+    is_user_from_dkt_club = False
+    if 'is_user_from_dkt_club' in req.COOKIES:
+        is_user_from_dkt_club = req.COOKIES.get('is_user_from_dkt_club')
+    else:
+        if 'utm_source' in req.GET:
+            logging.info("lol")
+            logging.info(req.GET['utm_source'])
+            if req.GET['utm_source'] == "decatclub":
+                is_user_from_dkt_club = True
+    return {"is_user_from_dkt_club": is_user_from_dkt_club}
+
 
 def background_use(req):
     return {'background_use': randint(1, 5)}

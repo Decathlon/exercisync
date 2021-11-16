@@ -170,7 +170,8 @@ MIDDLEWARE_CLASSES = (
     'tapiriik.web.startup.Startup',
     'tapiriik.web.startup.ServiceWebStartup',
     'tapiriik.auth.SessionAuth',
-    'tapiriik.device_support.DeviceSupportMiddleware'
+    'tapiriik.device_support.DeviceSupportMiddleware',
+    'tapiriik.user_origin.UserOriginMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -200,6 +201,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'tapiriik.web.context_processors.device_support',
     'tapiriik.web.context_processors.background_use',
     'tapiriik.web.context_processors.vue_link',
+    'tapiriik.web.context_processors.is_user_from_dkt_club',
     'django.core.context_processors.static',
     'django.core.context_processors.request',
     'django.template.context_processors.i18n')

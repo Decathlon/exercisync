@@ -13,38 +13,50 @@
 		
 	<ul class="vtmn-mb-2 services-list">
 		<li v-for="service in services" :key="service.id" :id="service.id">
-			<div class="vtmn-flex">
-				<div :class="['vtmn-border vtmn-flex vtmn-flex-col vtmn-items-center vtmn-h-8 vtmn-w-8 vtmn-rounded-lg vtmn-border-grey-light-2', !service.isConnected ? 'vtmn-opacity-50' : '']">
-					<div
-						:class="['round-icon vtmn-text-white vtmn-my-1', isBidirectional(service) ? 'green' : 'blue']">
-						<span
-							:class="isBidirectional(service) ? 'vtmx-arrow-left-right-line' : service.isSupplier ? 'vtmx-arrow-left-line' : 'vtmx-arrow-right-line'"></span>
+			<div class="service-line">
+				<div class="vtmn-flex">
+					<div :class="['vtmn-border vtmn-flex vtmn-flex-col vtmn-items-center vtmn-h-8 vtmn-w-8 vtmn-rounded-lg vtmn-border-grey-light-2', !service.isConnected ? 'vtmn-opacity-50' : '']">
+						<div
+							:class="['round-icon vtmn-text-white vtmn-my-1', isBidirectional(service) ? 'green' : 'blue']">
+							<span
+								:class="isBidirectional(service) ? 'vtmx-arrow-left-right-line' : service.isSupplier ? 'vtmx-arrow-left-line' : 'vtmx-arrow-right-line'"></span>
+						</div>
+						<div class="vtmn-content-center vtmn-mx-1">
+							<img  class="little-logo" :src="'{{STATIC_URL}}img/logos/'+service.id+'.svg'" :alt="service.displayName+' logo'">
+						</div>
 					</div>
-					<div class="vtmn-content-center vtmn-mx-1">
-						<img  class="little-logo" :src="'{{STATIC_URL}}img/logos/'+service.id+'.svg'" :alt="service.displayName+' logo'">
+					<div class="vtmn-ml-2">
+						<small><b>{% verbatim %}{{service.displayName}}{% endverbatim %}</b></small>
+						<small class="grey-text my-2px" v-if="service.isConnected">{% trans "Synchronized" %}</small>
+						<small class="grey-text my-2px" v-else>{% trans "Not synchronized" %}</small>
+	
+						<div class="tag green" v-if="isBidirectional(service)">
+							{% trans "Sending and receiving" %}
+						</div>
+	
+						<div class="tag blue" v-else-if="service.isReceiver">
+							{% trans "Sending only" %}
+						</div>
+	
+						<div class="tag blue" v-else>
+							{% trans "Receiving only" %}
+						</div>
 					</div>
 				</div>
-				<div class="vtmn-ml-2">
-					<small><b>{% verbatim %}{{service.displayName}}{% endverbatim %}</b></small>
-					<small class="grey-text my-2px" v-if="service.isConnected">{% trans "Synchronized" %}</small>
-					<small class="grey-text my-2px" v-else>{% trans "Not synchronized" %}</small>
-
-					<div class="tag green" v-if="isBidirectional(service)">
-						{% trans "Sending and receiving" %}
-					</div>
-
-					<div class="tag blue" v-else-if="service.isReceiver">
-						{% trans "Sending only" %}
-					</div>
-
-					<div class="tag blue" v-else>
-						{% trans "Receiving only" %}
-					</div>
-				</div>
+				<button v-if="service.isConnected" class="button-sync vtmn-mt-1"
+					@click="openDisconnectModal(service.id)">{% trans "Desynchronize" %}</button>
+				<a v-if="!service.isConnected" class="button button-sync vtmn-mt-1" :href="service.authURI">{% trans "Synchronize" %}</a>
 			</div>
-			<button v-if="service.isConnected" class="button-sync vtmn-mt-1"
-				@click="openDisconnectModal(service.id)">{% trans "Desynchronize" %}</button>
-			<a v-if="!service.isConnected" class="button button-sync vtmn-mt-1" :href="service.authURI">{% trans "Synchronize" %}</a>
+
+			{% if is_user_from_dkt_club %}
+			<div class="dkt-club-tooltip" v-if="service.id == 'strava'">
+				<div class="tooltip-icon"></div>
+				<small>
+					Ce service ne permet pas de gagner des points de fidélité 
+					<a href="" class="vtmn-link vtmn-link--standalone small vtmn-link--icon-along">Decat'Club</a>
+				</small>
+			</div>
+			{% endif %}
 		</li>
 	</ul>
 
