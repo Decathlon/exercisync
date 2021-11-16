@@ -6,7 +6,6 @@ from tapiriik.database import db
 from datetime import datetime
 from random import randint
 import json
-import logging
 
 def providers(req):
     return {"service_providers": Service.List()}
@@ -106,16 +105,16 @@ def device_support(req):
 
 
 def is_user_from_dkt_club(req):
+    COOKIE_NAME = "is_user_from_dkt_club"
+
     is_user_from_dkt_club = False
-    if 'is_user_from_dkt_club' in req.COOKIES:
-        is_user_from_dkt_club = req.COOKIES.get('is_user_from_dkt_club')
+    if COOKIE_NAME in req.COOKIES:
+        is_user_from_dkt_club = req.COOKIES.get(COOKIE_NAME)
     else:
         if 'utm_source' in req.GET:
-            logging.info("lol")
-            logging.info(req.GET['utm_source'])
             if req.GET['utm_source'] == "decatclub":
                 is_user_from_dkt_club = True
-    return {"is_user_from_dkt_club": is_user_from_dkt_club}
+    return {COOKIE_NAME: is_user_from_dkt_club}
 
 
 def background_use(req):

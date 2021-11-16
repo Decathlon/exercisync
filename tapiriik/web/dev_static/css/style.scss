@@ -128,6 +128,7 @@ button#sync-now-btn[disabled] span {
 }
 
 .tooltip-icon{
+    flex-shrink: 0;
     height: 12px;
     width: 12px;
     margin-right: 4px;
@@ -280,6 +281,7 @@ ul {
             }
 
             & div.dkt-club-tooltip {
+                display: flex;
                 background-color: var(--vtmn-base-color_grey100);
                 padding: 8px 24px 8px 10px;
             }
