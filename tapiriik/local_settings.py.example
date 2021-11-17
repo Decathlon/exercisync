@@ -115,3 +115,5 @@ AWS_SQS_QUEUE_NAME="###"
 
 MONGO_DB_PREFIX="###"
 MONGO_HOST_API = "mongodb://root:dev@mongo_1:27017"
+
+DECAT_CLUB_ENV_LINK = "https://perdu.com/"
