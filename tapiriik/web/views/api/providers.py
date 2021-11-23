@@ -7,8 +7,26 @@ import logging
 @ensure_csrf_cookie
 def providers(req):
     if req.user != None:
-        user_connections = [conns.get("Service") for conns in req.user.get("ConnectedServices")]
-        active_providers = [{"id": x.ID, "displayName": x.DisplayName, "isReceiver": x.ReceivesActivities, "isSupplier": x.ProvidesActivities, "isConnected": True if x.ID in user_connections else False, "authURI": x.UserAuthorizationURL} for x in Service.List() if x.ID not in WITHDRAWN_SERVICES and x.ID != "decathlon"]        
+        user_connections = req.user.get("ConnectedServices")
+        user_connections_name = [connection["Service"] for connection in user_connections]
+        user_connections_with_auth_error = [
+            connection["Service"]
+            for connection in user_connections
+            if Service.GetServiceRecordByID(connection["ID"]).HasAuthSyncError() 
+        ]
+
+        active_providers = [
+            {
+                "id": x.ID, 
+                "displayName": x.DisplayName, 
+                "mustReconnect": x.ID in user_connections_with_auth_error, 
+                "isReceiver": x.ReceivesActivities, 
+                "isSupplier": x.ProvidesActivities, 
+                "isConnected": True if x.ID in user_connections_name else False, 
+                "authURI": x.UserAuthorizationURL
+            } for x in Service.List() if x.ID not in WITHDRAWN_SERVICES and x.ID != "decathlon"
+        ] 
+
         return JsonResponse({"providers": active_providers})
     else:
         return HttpResponse(content="<h1>Unauthorized</h1>" ,status=403)
