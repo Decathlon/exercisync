@@ -185,8 +185,13 @@ class SuuntoService(ServiceBase):
             })
 
             if response.status_code != 200:
-                raise APIException("No authorization to refresh token", block=True, user_exception=UserException(
-                    UserExceptionType.Authorization, intervention_required=True))
+                if response.status_code == 401 or response.status_code == 403:
+                    raise APIException("%i - No authorization to refresh token for the user with SUUNTO ID : %s" %(response.status_code, serviceRecord.ExternalID), block=True,
+                                        user_exception=UserException(UserExceptionType.Authorization,
+                                        intervention_required=True))
+                else: 
+                    raise APIException("%i - Can't refresh token (for an undefined reason) for the user with SUUNTO ID : %s" %(response.status_code, serviceRecord.ExternalID))
+
 
             data = response.json()
 
