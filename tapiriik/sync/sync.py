@@ -797,7 +797,7 @@ class SynchronizationTask:
         TZOffsets = [x.StartTime.utcoffset().total_seconds() / 60 for x in activities if x.TZ is not None]
         mode = Counter(TZOffsets).most_common(1)
         if not len(mode):
-            if "Timezone" in self.user:
+            if "Timezone" in self.user and self.user.get("Timezone") != None:
                 return pytz.timezone(self.user["Timezone"])
             return None
         return pytz.FixedOffset(mode[0][0])
