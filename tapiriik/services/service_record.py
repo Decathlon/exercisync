@@ -42,7 +42,8 @@ class ServiceRecord:
 
     def HasAuthSyncError(self):
         if hasattr(self, "SyncErrors"):
-            return next((se for se in self.SyncErrors if se["UserException"]["InterventionRequired"] and se["Block"] and se["UserException"]["Type"] == "auth"), False) is not False
+            sync_errors_with_user_exception = [se for se in self.SyncErrors if "UserException" in se]
+            return next((se for se in sync_errors_with_user_exception if se["UserException"].get("InterventionRequired") and se.get("Block") and se["UserException"].get("Type") == "auth"), False) is not False
         else:
             return False
 
