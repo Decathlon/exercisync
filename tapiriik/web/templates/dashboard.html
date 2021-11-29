@@ -27,7 +27,8 @@
 					</div>
 					<div class="vtmn-ml-2">
 						<small><b>{% verbatim %}{{service.displayName}}{% endverbatim %}</b></small>
-						<small class="grey-text my-2px" v-if="service.isConnected">{% trans "Synchronized" %}</small>
+						<small class="red-text my-2px" v-if="service.isConnected && service.mustReconnect">{% trans "Need to be re-synchronized" %}</small>
+						<small class="grey-text my-2px" v-else-if="service.isConnected">{% trans "Synchronized" %}</small>
 						<small class="grey-text my-2px" v-else>{% trans "Not synchronized" %}</small>
 	
 						<div class="tag green" v-if="isBidirectional(service)">
@@ -43,9 +44,10 @@
 						</div>
 					</div>
 				</div>
-				<button v-if="service.isConnected" class="button-sync vtmn-mt-1"
+				<a v-if="service.isConnected && service.mustReconnect" class="button conversion vtmn-mt-1" :href="service.authURI">{% trans "Re-synchronize" %}</a>
+				<button v-else-if="service.isConnected" class="button-sync vtmn-mt-1"
 					@click="openDisconnectModal(service.id)">{% trans "Desynchronize" %}</button>
-				<a v-if="!service.isConnected" class="button button-sync vtmn-mt-1" :href="service.authURI">{% trans "Synchronize" %}</a>
+				<a v-else class="button button-sync vtmn-mt-1" :href="service.authURI">{% trans "Synchronize" %}</a>
 			</div>
 
 			{% if is_user_from_dkt_club %}

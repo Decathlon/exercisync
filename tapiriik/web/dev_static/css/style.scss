@@ -8,6 +8,10 @@
     color: var(--vtmn-color_grey);
 }
 
+.red-text {
+    color: red;
+}
+
 .green{
     background-color: var(--vtmn-color_green-dark-2);
 }
@@ -94,6 +98,10 @@ button, a.button{
     }
     &.button-sync{
         @extend .vtmn-btn_variant--ghost;
+        @extend .vtmn-btn_size--small;
+    }
+    &.conversion, & .conversion{
+        @extend .vtmn-btn_variant--conversion;
         @extend .vtmn-btn_size--small;
     }
 }
