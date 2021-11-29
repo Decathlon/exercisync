@@ -1332,6 +1332,10 @@ msgid "Not synchronized"
 msgstr "Non synchronisé"
 
 
+msgid "Need to be re-synchronized"
+msgstr "Nécessite une re-synchronisation"
+
+
 msgid "Sending and receiving"
 msgstr "Récupération et envoi"
 
@@ -1347,6 +1351,12 @@ msgstr "Désynchroniser"
 
 msgid "Synchronize"
 msgstr "Synchroniser"
+
+
+msgid "Re-synchronize"
+msgstr "Re-synchroniser"
+
+
 
 
 
