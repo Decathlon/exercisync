@@ -306,25 +306,33 @@ class FitbitService(ServiceBase):
                                      })
 
             if response.status_code != 200:
-                raise APIException("No authorization to refresh token", block=True,
-                                   user_exception=UserException(UserExceptionType.Authorization,
-                                                                intervention_required=True))
+                errors = response.json().get("errors")
+                if (response.status_code == 401 or response.status_code == 403 
+                    or (response.json().get("errors") != None
+                        and len(errors) > 0
+                        and errors[0].get("errorType") == "invalid_grant")):
+                    raise APIException("%i - No authorization to refresh token for the user with FITBIT ID : %s" %(response.status_code, serviceRecord.ExternalID), block=True,
+                                        user_exception=UserException(UserExceptionType.Authorization,
+                                        intervention_required=True))
+                else: 
+                    raise APIException("%i - Can't refresh token (for an undefined reason) for the user with FITBIT ID : %s" %(response.status_code, serviceRecord.ExternalID))
+            else:
 
-            data = response.json()
+                data = response.json()
 
-            now = datetime.now(timezone.utc)
-            endDate = now + timedelta(seconds=data['expires_in'])
+                now = datetime.now(timezone.utc)
+                endDate = now + timedelta(seconds=data['expires_in'])
 
-            authorizationData = {
-                "AccessToken": data["access_token"],
-                "AccessTokenRequestedAt": now,
-                "AccessTokenExpiresAt": endDate,
-                "RefreshToken": data["refresh_token"],
-                'TokenType': data['token_type']
-            }
+                authorizationData = {
+                    "AccessToken": data["access_token"],
+                    "AccessTokenRequestedAt": now,
+                    "AccessTokenExpiresAt": endDate,
+                    "RefreshToken": data["refresh_token"],
+                    'TokenType': data['token_type']
+                }
 
-            serviceRecord.Authorization.update(authorizationData)
-            db.connections.update({"_id": serviceRecord._id}, {"$set": {"Authorization": authorizationData}})
+                serviceRecord.Authorization.update(authorizationData)
+                db.connections.update({"_id": serviceRecord._id}, {"$set": {"Authorization": authorizationData}})
 
         #session.headers.update({"Authorization": "access_token %s" % serviceRecord.Authorization["AccessToken"]})
         return reqLambda(session)
