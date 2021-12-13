@@ -227,7 +227,7 @@ class GarminHealthService(ServiceBase):
             resp = oauthSession.get(activity_file_url)
             if resp.status_code != 204 and resp.status_code != 200:
                 if resp.status_code == 401 or resp.status_code == 403:
-                    raise APIException("%i - No authorization to refresh token for the user with SUUNTO ID : %s" %(resp.status_code, svcRecord.ExternalID), block=True,
+                    raise APIException("%i - No authorization to refresh token for the user with GARMIN ID : %s" %(resp.status_code, svcRecord.ExternalID), block=True,
                                         user_exception=UserException(UserExceptionType.Authorization,
                                         intervention_required=True))
                 else:
