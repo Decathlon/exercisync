@@ -211,6 +211,10 @@ class PolarFlowService(ServiceBase):
                 raise APIException("Transaction disbanded", user_exception=UserException(UserExceptionType.DownloadError))
             elif response.status_code == 204:
                 raise APIException("No FIT available for exercise", user_exception=UserException(UserExceptionType.DownloadError))
+            elif response.status_code == 401 or response.status_code == 403:
+                raise APIException("%i - No authorization to get activity for the user with POLARFLOW ID '%s' the user's token may have expired or been corrupted" %(response.status_code, serviceRecord.ExternalID), block=True,
+                                        user_exception=UserException(UserExceptionType.Authorization,
+                                        intervention_required=True))
 
             activity = FITIO.Parse(response.content)
             activity.SourceServiceID = self.ID
