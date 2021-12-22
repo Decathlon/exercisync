@@ -169,8 +169,12 @@ class CorosService(ServiceBase):
         response = requests.post(self._BaseUrl+"/oauth2/refresh-token", data=params)
 
         tokenRefreshmentStatus = response.json()
-        if tokenRefreshmentStatus["message"] != "OK":
-            raise APIException("Can't refresh token")
+        if tokenRefreshmentStatus["message"] == "Token expired or invalid":
+            raise APIException("[%s] - No authorization to refresh token for the user with COROS ID : %s" %(tokenRefreshmentStatus["result"]+" : "+tokenRefreshmentStatus["message"], serviceRecord.ExternalID), block=True,
+                                user_exception=UserException(UserExceptionType.Authorization,
+                                intervention_required=True))
+        elif tokenRefreshmentStatus["message"] != "OK":
+            raise APIException("%i - Corros message [%s] - Can't refresh token for an unknown reason for the user with COROS ID : %s" % (response.status_code, tokenRefreshmentStatus["result"]+" : "+tokenRefreshmentStatus["message"], serviceRecord.ExternalID))
 
         authorizationData = {
                 "AccessToken": serviceRecord.Authorization.get("AccessToken"),
