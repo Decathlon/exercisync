@@ -98,8 +98,12 @@ def sync_clear_errorgroup(req, service, group):
 
 @csrf_exempt
 def sync_trigger_partial_sync_callback(req, service):
+    import logging
+    
     svc = Service.FromID(service)
     if req.method == "POST":
+        webhookBegining = datetime.now()
+        logging.info("WEBHOOK %s has send a webhook notification" % svc.ID)
         
         # We import the trigger handler mostly for strava rate limitations
         from sync_remote_triggers import trigger_remote
@@ -135,6 +139,11 @@ def sync_trigger_partial_sync_callback(req, service):
                 "message":"ok",
                 "result":"0000"
             })  
+            
+        webhookEnd = datetime.now()
+        delta = webhookEnd - webhookBegining
+        logging.info("WEBHOOK %s - Ended processing of webhook in %f seconds" % (svc.ID, delta.total_seconds()))
+
         return HttpResponse(status=svc.PartialSyncTriggerStatusCode)
 
     elif req.method == "GET":	
