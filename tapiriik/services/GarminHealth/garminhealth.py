@@ -218,37 +218,44 @@ class GarminHealthService(ServiceBase):
             
             # Spliting the URL from the Activity Name
             decoded_activity_file_url_and_name_and_id = activity_file_url_and_name_and_id.decode('UTF-8')
-            logger.info("\t redis key Garmin : %s" % decoded_activity_file_url_and_name_and_id)
-            activity_file_url = decoded_activity_file_url_and_name_and_id.split("::")[0]
-            activity_file_name = decoded_activity_file_url_and_name_and_id.split("::")[1]
-            activity_id = decoded_activity_file_url_and_name_and_id.split("::")[2]
+            logger.info("Garmin activity download parameters: %s" % decoded_activity_file_url_and_name_and_id)
 
-            # Downlaoding the activity fit file
-            resp = oauthSession.get(activity_file_url)
-            if resp.status_code != 204 and resp.status_code != 200:
-                if resp.status_code == 401 or resp.status_code == 403:
-                    raise APIException("%i - No authorization to refresh token for the user with GARMIN ID : %s" %(resp.status_code, svcRecord.ExternalID), 
-                                        block=True,
-                                        user_exception=UserException(UserExceptionType.Authorization, intervention_required=True))
+            activity_download_parameters = decoded_activity_file_url_and_name_and_id.split("::")
+
+            if len(activity_download_parameters) == 3:
+                activity_file_url = activity_download_parameters[0]
+                activity_file_name = activity_download_parameters[1]
+                activity_id = activity_download_parameters[2]
+
+                # Downlaoding the activity fit file
+                resp = oauthSession.get(activity_file_url)
+                if resp.status_code != 204 and resp.status_code != 200:
+                    if resp.status_code == 401 or resp.status_code == 403:
+                        raise APIException("%i - No authorization to refresh token for the user with GARMIN ID : %s" %(resp.status_code, svcRecord.ExternalID), 
+                                            block=True,
+                                            user_exception=UserException(UserExceptionType.Authorization, intervention_required=True))
+                    else:
+                        logger.warning("\tAn error occured while downloading Garmin Health activity, status code %s, content %s" % (
+                            (str(resp.status_code), resp.content)))
                 else:
-                    logger.warning("\tAn error occured while downloading Garmin Health activity, status code %s, content %s" % (
-                        (str(resp.status_code), resp.content)))
-            else:
-                pre_download_counter += 1
-                try:
-                    activity = FITIO.Parse(resp.content)
-                    activity.SourceServiceID = self.ID
-                except FitEOFError as e:
-                    logger.warning("Can't parse the file from %s. Skipping this activity." % activity_file_url)
-                    continue
-                # As the name can be None in the webhook we could have empty string as a fallback to avoid redis crash.
-                # In this case it's better to set the activity.Name to None as the FITIO.Parse have an activity name guess behaviour.
-                activity.Name = activity_file_name if activity_file_name != "" else None
+                    pre_download_counter += 1
+                    try:
+                        activity = FITIO.Parse(resp.content)
+                        activity.SourceServiceID = self.ID
+                    except FitEOFError as e:
+                        logger.warning("Can't parse the file from %s. Skipping this activity." % activity_file_url)
+                        continue
+                    # As the name can be None in the webhook we could have empty string as a fallback to avoid redis crash.
+                    # In this case it's better to set the activity.Name to None as the FITIO.Parse have an activity name guess behaviour.
+                    activity.Name = activity_file_name if activity_file_name != "" else None
 
-                activity.CalculateUID()
-                post_download_counter += 1
-                activities.append(activity)
-                logger.info("\tGarmin Activity ID : " + activity_id)
+                    activity.CalculateUID()
+                    post_download_counter += 1
+                    activities.append(activity)
+                    logger.info("Garmin Activity with ID %s for user %s has been downloaded " % (activity_id, svcRecord.ExternalID))
+
+            else:
+                logger.warning("[GARMIN error] User with GARMIN ID %s, has a wrong value. Value ignored : %s" % (svcRecord.ExternalID, decoded_activity_file_url_and_name_and_id))
 
         logger.info("\t\t total Garmin activities downloaded : %i" % pre_download_counter)
         logger.info("\t\t\t Listed activities by redis : %i" % len(activity_file_urls_list))
