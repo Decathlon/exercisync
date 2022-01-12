@@ -144,6 +144,8 @@ def sync_trigger_partial_sync_callback(req, service):
         delta = webhookEnd - webhookBegining
         logging.info("WEBHOOK %s - Ended processing of webhook in %f seconds" % (svc.ID, delta.total_seconds()))
 
+        if  svc.ID == "garminhealth":
+            return HttpResponse(status=svc.PartialSyncTriggerStatusCode, content="0\r\n")
         return HttpResponse(status=svc.PartialSyncTriggerStatusCode)
 
     elif req.method == "GET":	
