@@ -2,7 +2,7 @@
 # (c) 2018 Anton Ashmarin, aashmarin@gmail.com
 from tapiriik.settings import WEB_ROOT, POLAR_CLIENT_SECRET, POLAR_CLIENT_ID, POLAR_RATE_LIMITS
 from tapiriik.services.service_base import ServiceAuthenticationType, ServiceBase
-from tapiriik.services.api import APIException, UserException, UserExceptionType
+from tapiriik.services.api import APIException, UserException, UserExceptionType, APIExcludeActivity
 from tapiriik.services.interchange import UploadedActivity, ActivityType, ActivityStatistic, ActivityStatisticUnit
 from tapiriik.services.fit import FITIO
 from tapiriik.database import redis
@@ -206,11 +206,17 @@ class PolarFlowService(ServiceBase):
                 logger.warning("Found more than one time the activity id from the redis key %s" % (redis_key))
 
             response = requests.get(act_url.decode('utf-8')+"/fit", headers=self._api_headers(serviceRecord, {"Accept": "*/*"}))
+            activity_id = act_url.decode('utf-8').split('/')[-1]
+
             if response.status_code == 404:
-                # Transaction was disbanded, all data linked to it will be returned in next transaction
-                raise APIException("Transaction disbanded", user_exception=UserException(UserExceptionType.DownloadError))
+                # Activity not found
+                exclusions.append(APIExcludeActivity("Can't find an activity for this user at this URL %s" % act_url.decode('utf-8'), activity_id=activity_id, user_exception=UserException(UserExceptionType.DownloadError)))
+                logging.warning("Can't find an activity for POLARFLOW user ID %s for the activity with ID %s" % (serviceRecord.ExternalID, activity_id))
+                continue
             elif response.status_code == 204:
-                raise APIException("No FIT available for exercise", user_exception=UserException(UserExceptionType.DownloadError))
+                exclusions.append(APIExcludeActivity("Can't find an activity for this user at this URL %s" % act_url.decode('utf-8'), activity_id=activity_id, user_exception=UserException(UserExceptionType.DownloadError)))
+                logging.warning("Found an activity without fit file available for POLARFLOW user ID %s for the activity with ID %s" % (serviceRecord.ExternalID, activity_id))
+                continue
             elif response.status_code == 401 or response.status_code == 403:
                 raise APIException("%i - No authorization to get activity for the user with POLARFLOW ID '%s' the user's token may have expired or been corrupted" %(response.status_code, serviceRecord.ExternalID), block=True,
                                         user_exception=UserException(UserExceptionType.Authorization,
@@ -222,7 +228,7 @@ class PolarFlowService(ServiceBase):
 
             activities.append(activity)
         
-        logger.info("\tNumber of polar activities %i" % len(activities))
+        logger.info("Successfully downloaded %i/%i activities for POLARFLOW user ID %s" % (len(activities),len(activity_urls_list),serviceRecord.ExternalID))
         return activities, exclusions
 
     def DownloadActivity(self, serviceRecord, activity):
