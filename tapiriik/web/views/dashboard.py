@@ -10,10 +10,7 @@ def dashboard(req):
     else:
         if req.user is not None:
             dkt_svc_record = Service.GetServiceRecordByID(next((svc["ID"] for svc in req.user.get("ConnectedServices") if svc.get("Service") == "decathlon"), None))
-            if hasattr(dkt_svc_record, "SyncErrors"):
-                sync_errors = dkt_svc_record.SyncErrors
-                dkt_service_has_authentication_error = next((se for se in sync_errors if se["UserException"]["InterventionRequired"] and se["Block"] and se["UserException"]["Type"] == "auth"), False) is not False
-                if dkt_service_has_authentication_error:
-                    User.Logout(req)
-                    return redirect(dkt_svc_record.Service.UserAuthorizationURL)
+            if dkt_svc_record.HasAuthSyncError():
+                User.Logout(req)
+                return redirect(dkt_svc_record.Service.UserAuthorizationURL)
         return render(req, "dashboard.html")
