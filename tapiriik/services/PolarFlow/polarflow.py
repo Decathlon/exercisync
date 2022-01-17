@@ -211,11 +211,11 @@ class PolarFlowService(ServiceBase):
             if response.status_code == 404:
                 # Activity not found
                 exclusions.append(APIExcludeActivity("Can't find an activity for this user at this URL %s" % act_url.decode('utf-8'), activity_id=activity_id, user_exception=UserException(UserExceptionType.DownloadError)))
-                logging.warning("Can't find an activity for POLARFLOW user ID %s for the activity with ID %s" % (serviceRecord.ExternalID, activity_id))
+                logging.warning("Can't find an activity with ID %s for POLARFLOW user ID %s" % (activity_id, serviceRecord.ExternalID))
                 continue
             elif response.status_code == 204:
                 exclusions.append(APIExcludeActivity("Can't find an activity for this user at this URL %s" % act_url.decode('utf-8'), activity_id=activity_id, user_exception=UserException(UserExceptionType.DownloadError)))
-                logging.warning("Found an activity without fit file available for POLARFLOW user ID %s for the activity with ID %s" % (serviceRecord.ExternalID, activity_id))
+                logging.warning("FIT file does not exist for activity with ID %s for POLARFLOW user ID %s" % (activity_id, serviceRecord.ExternalID))
                 continue
             elif response.status_code == 401 or response.status_code == 403:
                 raise APIException("%i - No authorization to get activity for the user with POLARFLOW ID '%s' the user's token may have expired or been corrupted" %(response.status_code, serviceRecord.ExternalID), block=True,
