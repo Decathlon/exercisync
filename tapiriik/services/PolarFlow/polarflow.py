@@ -214,7 +214,7 @@ class PolarFlowService(ServiceBase):
                 logging.warning("Can't find an activity with ID %s for POLARFLOW user ID %s" % (activity_id, serviceRecord.ExternalID))
                 continue
             elif response.status_code == 204:
-                exclusions.append(APIExcludeActivity("Can't find an activity for this user at this URL %s" % act_url.decode('utf-8'), activity_id=activity_id, user_exception=UserException(UserExceptionType.DownloadError)))
+                exclusions.append(APIExcludeActivity("FIT file does not exist for this user at this URL %s" % act_url.decode('utf-8'), activity_id=activity_id, user_exception=UserException(UserExceptionType.DownloadError)))
                 logging.warning("FIT file does not exist for activity with ID %s for POLARFLOW user ID %s" % (activity_id, serviceRecord.ExternalID))
                 continue
             elif response.status_code == 401 or response.status_code == 403:
@@ -224,7 +224,7 @@ class PolarFlowService(ServiceBase):
 
             activity = FITIO.Parse(response.content)
             activity.SourceServiceID = self.ID
-            activity.ServiceData = {"ActivityID": act_url.decode('utf-8').split('/')[-1]}
+            activity.ServiceData = {"ActivityID": activity_id}
 
             activities.append(activity)
         
