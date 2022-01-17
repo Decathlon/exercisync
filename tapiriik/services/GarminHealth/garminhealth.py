@@ -252,7 +252,7 @@ class GarminHealthService(ServiceBase):
                     activity.CalculateUID()
                     post_download_counter += 1
                     activities.append(activity)
-                    logger.info("Garmin Activity with ID %s and Start date %s for user %s has been downloaded " % (activity_id, activity.StartTime.strftime("%Y-%m-%d %H:%M:%S") ,svcRecord.ExternalID))
+                    logger.info("Garmin Activity with ID %s and Start date %s for user %s has been downloaded " % (activity_id, activity.StartTime.strftime("%Y-%m-%d %H:%M:%S") if activity.StartTime is not None else "UNKNOWN",svcRecord.ExternalID))
 
             else:
                 logger.warning("[GARMIN error] User with GARMIN ID %s, has a wrong value. Value ignored : %s" % (svcRecord.ExternalID, decoded_activity_file_url_and_name_and_id))
