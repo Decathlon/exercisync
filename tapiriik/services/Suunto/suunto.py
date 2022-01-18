@@ -236,15 +236,15 @@ class SuuntoService(ServiceBase):
             response = self._requestWithAuth(lambda session: session.get("https://cloudapi.suunto.com/v2/workout/exportFit/"+act_id), svcRecord)
             if response.status_code == 404:
                 exclusions.append(APIExcludeActivity("404 Can't find an activity for this user with this ID %s" % act_id, activity_id=act_id, user_exception=UserException(UserExceptionType.DownloadError)))
-                logging.warning("Can't find an activity with ID %s for SUUNTO user ID %s" % (act_id, svcRecord.ExternalID))
+                logging.warning("Can't find an activity (404) with ID %s for SUUNTO user ID %s" % (act_id, svcRecord.ExternalID))
                 continue
             elif response.status_code == 403:
                 exclusions.append(APIExcludeActivity("403 Access forbidden for activity with ID %s" % act_id, activity_id=act_id, user_exception=UserException(UserExceptionType.DownloadError)))
-                logging.warning("Access forbidden for activity with ID %s for SUUNTO user ID %s" % (act_id, svcRecord.ExternalID))
+                logging.warning("Access forbidden (403) for activity with ID %s for SUUNTO user ID %s" % (act_id, svcRecord.ExternalID))
                 continue
             elif response.status_code == 400:
                 exclusions.append(APIExcludeActivity("400 Bad request for activity with ID %s" % act_id, activity_id=act_id, user_exception=UserException(UserExceptionType.DownloadError)))
-                logging.warning("Bad request for activity with ID %s for SUUNTO user ID %s" % (act_id, svcRecord.ExternalID))
+                logging.warning("Bad request (400) for activity with ID %s for SUUNTO user ID %s" % (act_id, svcRecord.ExternalID))
                 continue
 
             activity = FITIO.Parse(response.content)
