@@ -219,31 +219,41 @@ class SuuntoService(ServiceBase):
         redis_key = "suunto:webhook:"+str(svcRecord.ExternalID)
         activity_ids_list = redis.lrange(redis_key, 0, -1)
 
-        for act_id in activity_ids_list:
+        for binary_act_id in activity_ids_list:
             # We delete it from the redis list to avoid syncing a second time
             # For an strange reason we have to do :
             #       redis.lrem(key, value)
             # Even if redis, redis-py docs and the signature of the function in the container ask to do
             #       redis.lrem(key, count ,value)
-            result = redis.lrem(redis_key, act_id)
+            result = redis.lrem(redis_key, binary_act_id)
             if result == 0:
                 logger.warning("Cant delete the activity id from the redis key %s" % (redis_key))
             elif result > 1 :
                 logger.warning("Found more than one time the activity id from the redis key %s" % (redis_key))
 
-            response = self._requestWithAuth(lambda session: session.get("https://cloudapi.suunto.com/v2/workout/exportFit/"+act_id.decode('utf-8')), svcRecord)
+            act_id = binary_act_id.decode('utf-8')
+
+            response = self._requestWithAuth(lambda session: session.get("https://cloudapi.suunto.com/v2/workout/exportFit/"+act_id), svcRecord)
             if response.status_code == 404:
-                raise APIException("Suunto can't find the activity : %s" % act_id, user_exception=UserException(UserExceptionType.DownloadError))
+                exclusions.append(APIExcludeActivity("404 Can't find an activity for this user with this ID %s" % act_id, activity_id=act_id, user_exception=UserException(UserExceptionType.DownloadError)))
+                logging.warning("Can't find an activity with ID %s for SUUNTO user ID %s" % (act_id, svcRecord.ExternalID))
+                continue
             elif response.status_code == 403:
-                raise APIException("Access forbiden to Sunnto activity : %s" % act_id, user_exception=UserException(UserExceptionType.DownloadError))
+                exclusions.append(APIExcludeActivity("403 Access forbidden for activity with ID %s" % act_id, activity_id=act_id, user_exception=UserException(UserExceptionType.DownloadError)))
+                logging.warning("Access forbidden for activity with ID %s for SUUNTO user ID %s" % (act_id, svcRecord.ExternalID))
+                continue
             elif response.status_code == 400:
-                raise APIException("Apparently a bad request has been made to suunto this must be examined", user_exception=UserException(UserExceptionType.DownloadError))
+                exclusions.append(APIExcludeActivity("400 Bad request for activity with ID %s" % act_id, activity_id=act_id, user_exception=UserException(UserExceptionType.DownloadError)))
+                logging.warning("Bad request for activity with ID %s for SUUNTO user ID %s" % (act_id, svcRecord.ExternalID))
+                continue
 
             activity = FITIO.Parse(response.content)
             activity.SourceServiceID = self.ID
             activity.ServiceData = {"ActivityID": act_id}
 
             activities.append(activity)
+        
+        logger.info("Successfully downloaded %i/%i activities for SUUNTO user ID %s" % (len(activities),len(activity_ids_list),svcRecord.ExternalID))
         return activities, exclusions
 
     def DownloadActivity(self, svcRecord, activity):
