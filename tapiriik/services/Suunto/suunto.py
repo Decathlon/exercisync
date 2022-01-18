@@ -253,7 +253,7 @@ class SuuntoService(ServiceBase):
 
             activities.append(activity)
         
-        logger.info("Successfully downloaded %i/%i activities for SUUNTO user ID %s" % (len(activities),len(activity_ids_list),svcRecord.ExternalID))
+        logger.info("Successfully downloaded %i/%i activities for SUUNTO user ID %s" % (len(activities), len(activity_ids_list), svcRecord.ExternalID))
         return activities, exclusions
 
     def DownloadActivity(self, svcRecord, activity):
