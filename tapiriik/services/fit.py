@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from .interchange import WaypointType, ActivityStatisticUnit, ActivityType, LapIntensity, LapTriggerMethod, Activity, Lap, UploadedActivity, Waypoint, Location, ActivityStatistics
+from .interchange import SwimmingStroke, WaypointType, ActivityStatisticUnit, ActivityType, LapIntensity, LapTriggerMethod, Activity, Lap, UploadedActivity, Waypoint, Location, ActivityStatistics
 from .devices import DeviceIdentifier, DeviceIdentifierType, Device
 from fitparse.profile import FIELD_TYPES
 import struct
@@ -23,10 +23,24 @@ class FITEvent:
 	Timer = 0
 	Lap = 9
 	Activity = 26
+	Length = 28
 
 class FITEventType:
 	Start = 0
 	Stop = 1
+
+class FITLengthType:
+    Idle = 0
+    Active = 1
+
+class FITSwimmingStroke:
+    Freestyle = 0
+    Backstroke = 1
+    Breaststroke = 2
+    Butterfly = 3
+    Drill = 4
+    Mixed = 5
+    Im = 6 #IM is a mixed interval containing the same number of lengths for each of: Butterfly, Backstroke, Breaststroke, Freestyle, swam in that order.
 
 # It's not a coincidence that these enums match the ones in interchange perfectly
 class FITLapIntensity:
@@ -276,6 +290,25 @@ class FITMessageGenerator:
 			4, "product", "uint16",
 			5, "software_version", "version"
 			)
+
+		defMsg("length", 101,
+			253, "timestamp", "date_time",
+			0, "event", "enum",
+			1, "event_type", "enum",
+			2, "start_time", "date_time",
+			3, "total_elapsed_time", "uint32",
+			4, "total_timer_time", "uint32",
+			5, "total_strokes", "uint16",
+			6, "avg_speed", "uint16",
+			7, "swim_stroke", "enum",
+			9, "avg_swimming_cadence", "uint8",
+			10, "event_group", "uint8",
+			11, "total_calories", "uint16",
+			12, "length_type", "enum",
+			18, "player_score", "uint16",
+			19, "opponent_score", "uint16",
+			20, "stroke_count", "uint16",
+			21, "zone_count", "uint16")
 
 	def _write(self, contents):
 		self._result.append(contents)
@@ -988,7 +1021,10 @@ class FITIO:
 					LapTriggerMethod.SessionEnd: FITLapTriggerMethod.SessionEnd,
 					LapTriggerMethod.FitnessEquipment: FITLapTriggerMethod.FitnessEquipment,
 				})[lap.Trigger]
-			fmg.GenerateMessage("lap", timestamp=toUtc(lap.EndTime), start_time=toUtc(lap.StartTime), event=FITEvent.Lap, event_type=FITEventType.Start, sport=sport, **lap_stats)
+			if act.Type != ActivityType.Swimming:
+				fmg.GenerateMessage("lap", timestamp=toUtc(lap.EndTime), start_time=toUtc(lap.StartTime), event=FITEvent.Lap, event_type=FITEventType.Start, sport=sport, **lap_stats)
+			else:
+				fmg.GenerateMessage("length", timestamp=toUtc(lap.EndTime), start_time=toUtc(lap.StartTime), event=FITEvent.Length, event_type=FITEventType.Stop, swim_stroke=FITSwimmingStroke.Freestyle, length_type=FITLengthType.Active)
 
 
 		# These need to be at the end for Strava
