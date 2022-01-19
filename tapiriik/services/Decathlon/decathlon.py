@@ -437,110 +437,116 @@ class DecathlonService(ServiceBase):
 
         activity.GPS = False
         activity.Stationary = True
-        #work on date
-        datebase = activity.StartTime
 
-        ridedata = {}
-        ridedataindex = []
+        if activity.Type == ActivityType.Swimming:
+            activity.Laps = [Lap(stats=activity.Stats, startTime=activity.StartTime, endTime=activity.EndTime)]
+            return activity
 
-        if "locations" in root and root["locations"] is not None:
-            for pt in root["locations"]:
-                delta = int(float(pt))
-                ridedataindex.append(delta)
-                ridedata[delta] = {}
-                ridedata[delta]['LATITUDE'] = float(root["locations"][pt]["latitude"])
-                ridedata[delta]['LONGITUDE'] = float(root["locations"][pt]["longitude"])
-                ridedata[delta]['ELEVATION'] = int(root["locations"][pt]["elevation"])
-            
-        if len(ridedata)>0 :
-            activity.GPS = True
-            activity.Stationary = False
+        else:
+            #work on date
+            datebase = activity.StartTime
 
-        if "datastream" in root and root["datastream"] is not None:
-            for measure in root["datastream"]:
-                delta = int(float(measure))
-                if delta not in ridedataindex :
+            ridedata = {}
+            ridedataindex = []
+
+            if "locations" in root and root["locations"] is not None:
+                for pt in root["locations"]:
+                    delta = int(float(pt))
                     ridedataindex.append(delta)
                     ridedata[delta] = {}
+                    ridedata[delta]['LATITUDE'] = float(root["locations"][pt]["latitude"])
+                    ridedata[delta]['LONGITUDE'] = float(root["locations"][pt]["longitude"])
+                    ridedata[delta]['ELEVATION'] = int(root["locations"][pt]["elevation"])
+                
+            if len(ridedata)>0 :
+                activity.GPS = True
+                activity.Stationary = False
 
-                if "5" in root["datastream"][measure]:
-                    ridedata[delta]['DISTANCE'] = int(root["datastream"][measure]["5"])
-                if "1" in root["datastream"][measure]:
-                    ridedata[delta]['HR'] = int(root["datastream"][measure]["1"])
-                if "6" in root["datastream"][measure]:
-                    ridedata[delta]['SPEED'] = int(root["datastream"][measure]["6"])
-                if self._unitMap["cadence"] in root["datastream"][measure]:
-                    ridedata[delta]['R_CADENCE'] = int(root["datastream"][measure]["10"])
-                if self._unitMap["rpm"] in root["datastream"][measure]:
-                    ridedata[delta]['CADENCE'] = int(root["datastream"][measure]["100"])
-                if "178" in root["datastream"][measure]:
-                    ridedata[delta]["POWER"] = int(root["datastream"][measure]["178"])
-                if "20" in root["datastream"][measure]:
-                    ridedata[delta]['LAP'] = int(root["datastream"][measure]["20"])
+            if "datastream" in root and root["datastream"] is not None:
+                for measure in root["datastream"]:
+                    delta = int(float(measure))
+                    if delta not in ridedataindex :
+                        ridedataindex.append(delta)
+                        ridedata[delta] = {}
 
-        ridedataindex.sort()
+                    if "5" in root["datastream"][measure]:
+                        ridedata[delta]['DISTANCE'] = int(root["datastream"][measure]["5"])
+                    if "1" in root["datastream"][measure]:
+                        ridedata[delta]['HR'] = int(root["datastream"][measure]["1"])
+                    if "6" in root["datastream"][measure]:
+                        ridedata[delta]['SPEED'] = int(root["datastream"][measure]["6"])
+                    if self._unitMap["cadence"] in root["datastream"][measure]:
+                        ridedata[delta]['R_CADENCE'] = int(root["datastream"][measure]["10"])
+                    if self._unitMap["rpm"] in root["datastream"][measure]:
+                        ridedata[delta]['CADENCE'] = int(root["datastream"][measure]["100"])
+                    if "178" in root["datastream"][measure]:
+                        ridedata[delta]["POWER"] = int(root["datastream"][measure]["178"])
+                    if "20" in root["datastream"][measure]:
+                        ridedata[delta]['LAP'] = int(root["datastream"][measure]["20"])
+
+            ridedataindex.sort()
 
 
-        if len(ridedata) == 0 :
-            lap = Lap(stats=activity.Stats, startTime=activity.StartTime, endTime=activity.EndTime)
-            activity.Laps = [lap]
-        else :
-            lapWaypoints = []
-            startTimeLap = activity.StartTime
-            for elapsedTime in ridedataindex:
-                rd = ridedata[elapsedTime]
-                wp = Waypoint()
-                delta = elapsedTime
-                formatedDate = datebase + timedelta(seconds=delta)
-                wp.Timestamp = formatedDate#self._parseDate(formatedDate.isoformat())
+            if len(ridedata) == 0 :
+                lap = Lap(stats=activity.Stats, startTime=activity.StartTime, endTime=activity.EndTime)
+                activity.Laps = [lap]
+            else :
+                lapWaypoints = []
+                startTimeLap = activity.StartTime
+                for elapsedTime in ridedataindex:
+                    rd = ridedata[elapsedTime]
+                    wp = Waypoint()
+                    delta = elapsedTime
+                    formatedDate = datebase + timedelta(seconds=delta)
+                    wp.Timestamp = formatedDate#self._parseDate(formatedDate.isoformat())
 
-                if 'LATITUDE' in rd :
-                    wp.Location = Location()
-                    wp.Location.Latitude = rd['LATITUDE']
-                    wp.Location.Longitude = rd['LONGITUDE']
-                    wp.Location.Altitude = rd['ELEVATION']
+                    if 'LATITUDE' in rd :
+                        wp.Location = Location()
+                        wp.Location.Latitude = rd['LATITUDE']
+                        wp.Location.Longitude = rd['LONGITUDE']
+                        wp.Location.Altitude = rd['ELEVATION']
 
-                if 'HR' in rd :
-                    wp.HR = rd['HR']
+                    if 'HR' in rd :
+                        wp.HR = rd['HR']
 
-                if 'SPEED' in rd :
-                    if rd['SPEED'] < 100000 :
-                        wp.Speed = round(rd['SPEED'] / 3600, 2)
+                    if 'SPEED' in rd :
+                        if rd['SPEED'] < 100000 :
+                            wp.Speed = round(rd['SPEED'] / 3600, 2)
 
-                if 'DISTANCE' in rd :
-                    wp.Distance = rd['DISTANCE']
+                    if 'DISTANCE' in rd :
+                        wp.Distance = rd['DISTANCE']
 
-                if 'CADENCE' in rd :
-                    wp.Cadence = rd['CADENCE']
+                    if 'CADENCE' in rd :
+                        wp.Cadence = rd['CADENCE']
 
-                if 'R_CADENCE' in rd :
-                    # Here we want the RunCadence to be a batch of 1 left and 1 right step (As the fit ask to)
-                     wp.RunCadence = rd['R_CADENCE']/2
+                    if 'R_CADENCE' in rd :
+                        # Here we want the RunCadence to be a batch of 1 left and 1 right step (As the fit ask to)
+                        wp.RunCadence = rd['R_CADENCE']/2
 
-                if 'POWER' in rd :
-                    wp.Power = rd['POWER']
+                    if 'POWER' in rd :
+                        wp.Power = rd['POWER']
 
-                lapWaypoints.append(wp)
+                    lapWaypoints.append(wp)
 
-                if "LAP" in rd :
-                    #build the lap
-                    # No statistic added because we don't have a way to effectively get them
-                    lap = Lap(startTime = startTimeLap, endTime = formatedDate)
+                    if "LAP" in rd :
+                        #build the lap
+                        # No statistic added because we don't have a way to effectively get them
+                        lap = Lap(startTime = startTimeLap, endTime = formatedDate)
+                        lap.Waypoints = lapWaypoints
+                        activity.Laps.append(lap)
+                        # re init a new lap
+                        startTimeLap = formatedDate
+                        lapWaypoints = []
+
+                #build last lap
+                if len(lapWaypoints)>0 :
+                    lap = Lap(startTime = startTimeLap, endTime = formatedDate) 
                     lap.Waypoints = lapWaypoints
                     activity.Laps.append(lap)
-                    # re init a new lap
-                    startTimeLap = formatedDate
-                    lapWaypoints = []
 
-            #build last lap
-            if len(lapWaypoints)>0 :
-                lap = Lap(startTime = startTimeLap, endTime = formatedDate) 
-                lap.Waypoints = lapWaypoints
-                activity.Laps.append(lap)
-
-            # avoiding 1 laps stats mismatch
-            if len(activity.Laps) == 1:
-                activity.Laps[0].Stats = activity.Stats
+                # avoiding 1 laps stats mismatch
+                if len(activity.Laps) == 1:
+                    activity.Laps[0].Stats = activity.Stats
 
         return activity
 
