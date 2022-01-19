@@ -410,7 +410,7 @@ class FitbitService(ServiceBase):
         # get user "start sync from date" info
         # then prepare afterDate var (this var determine the date since we download activities)
         user = db.users.find_one({'ConnectedServices': {'$elemMatch': {'ID': service_id, 'Service': 'fitbit'}}})
-        afterDateObj = datetime.now() - timedelta(days=2)
+        afterDateObj = datetime.now() - timedelta(days=40)
 
         # Obscure setting only used by fitbit so forcing to false
         # And for other obscure reason this date could be set couple of month before now so non exhaustive sync are sort of exhaustive.
