@@ -9,6 +9,7 @@ from tapiriik.services import Service
 from tapiriik.auth import User
 import json
 import logging
+from pymongo.errors import WriteError
 
 
 def auth_login(req, service):
@@ -77,10 +78,22 @@ def auth_disconnect_ajax(req, service):
     try:
         svcRec = User.GetConnectionRecord(req.user, service)
         if svcRec is None:
-            raise Exception("The user don't seems to be connected to %s" % service)
-
-        Service.DeleteServiceRecord(svcRec)
-        User.DisconnectService(svcRec)
+            User.DisconnectServiceByName(req.user.get("_id"), service)
+            logging.warning("HUB ID user %s had no connection to %s but the ref to this connection has been removed" % (req.user.get("_id"), service))
+            
+        else:
+            # Trying to remove the reference to the connection before the connection itself to avoid errors
+            User.DisconnectService(svcRec)
+            Service.DeleteServiceRecord(svcRec)
+    except WriteError as e:
+        logging.error("Got mongo WriteError while disconnecting user %s from %s. WriteError: %s, code: %s, details: %s" % (
+            req.user.get("_id"),
+            service,
+            e,
+            e.code,
+            e.details
+        ))
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
     except Exception as e:
         logging.error("An error occured while diconnecting user %s from %s. Exception : %s" % (req.user.get("_id"), service, e))
         return JsonResponse({"success": False, "error": str(e)}, status=500)

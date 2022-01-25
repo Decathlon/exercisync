@@ -1,3 +1,4 @@
+import logging
 from tapiriik.payments import *
 from .totp import *
 from tapiriik.database import db
@@ -190,6 +191,11 @@ class User:
                     # I guess we're done here?
                     db.activity_records.delete_one({"UserID": user["_id"]})
                     db.users.delete_one({"_id": user["_id"]})
+
+    def DisconnectServiceByName(userId, serviceName):
+        update_result = db.users.update_one({"_id": ObjectId(userId)}, {"$pull": {"ConnectedServices": {"Service": serviceName}}})
+        if update_result.modified_count != None and update_result.modified_count != 1:
+             logging.warning("No service %s disconnected for HUB user ID %s" % (serviceName, userId))
 
     def AuthByService(serviceRecord):
         return db.users.find_one({"ConnectedServices.ID": serviceRecord._id})

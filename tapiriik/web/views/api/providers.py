@@ -9,11 +9,16 @@ def providers(req):
     if req.user != None:
         user_connections = req.user.get("ConnectedServices")
         user_connections_name = [connection["Service"] for connection in user_connections]
-        user_connections_with_auth_error = [
-            connection["Service"]
-            for connection in user_connections
-            if Service.GetServiceRecordByID(connection["ID"]).HasAuthSyncError() 
-        ]
+
+        user_connections_with_auth_error = []
+        for connection in user_connections:
+            service_record = Service.GetServiceRecordByID(connection["ID"])
+            if service_record is None:
+                logging.warning("HUB ID User : %s don't have %s connection" % (req.user.get("_id"), connection["Service"]))
+                continue
+            else:
+                if service_record.HasAuthSyncError():
+                    user_connections_with_auth_error.append(connection["Service"])
 
         active_providers = [
             {
