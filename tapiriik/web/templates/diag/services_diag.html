@@ -1,57 +1,32 @@
 {% extends "site.html" %}
-{% load displayutils %}
 {% block title %}Stats{% endblock %}
-<!-- {% block extra_head %}
-    <link rel="stylesheet" href="/static/diagnostics.css"/>
-{% endblock %} -->
+
+{% block page_title %}Users stats{% endblock %}
+
 {% block content %}
-<div style="text-align:left">
-    <div class="block">
-        <h3>Users stats</h3>
-        <ul>
-            <li><b>Total number of users : </b>{{ userCt }}</li>
-            <li><b>Total number of connections : </b>{{ connCt }}</li>
-        </ul>
-        <table class="diagTable bfc">
-            <tr>
-                <th>Service Name</th>
-                <th>Number of<br>activations</th>
-                <th>Users only<br>subscribed<br>to coach</th>
-                <th>Mongo count of<br>webhook<br>subscribed Users</th>
-                {% if need_real %}<th>Real count of<br>webhook<br>subscribed Users</th>{% endif %}
-            </tr></li>
-            {% for svc_stat in services_stats %}
-                <tr>
-                    <td>{{svc_stat.Name}}</td>
-                    <td>{{svc_stat.NbUsers}}</td>
-                    <td>
-                        {% if svc_stat.OneSvcSubedUsers != None %}
-                            {{svc_stat.OneSvcSubedUsers}}
-                        {% else %}
-                            NC
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if svc_stat.MongoNbWebhookSubedUsers != None %}
-                            {{svc_stat.MongoNbWebhookSubedUsers}}
-                        {% else %}
-                            NC
-                        {% endif %}
-                    </td>
-                    {% if need_real %}
-                        <td>   
-                        {% if svc_stat.RealNbWebhookSubedUsers != None %}
-                            {{svc_stat.RealNbWebhookSubedUsers}}
-                        {% else %}
-                            NC
-                        {% endif %}
-                        </td>
-                    {% endif %}
-                </tr>
-            {% endfor %}
-        </table>
-    </div>
-</div>
+<p><b>Total number of users : </b>{{ userCt }}</p>
+<p><b>Total number of connections : </b>{{ connCt }}</p>
 
+<table>
+    <tr>
+        <th style="text-align: left;">Service Name</th>
+        <th style="text-align: left;">Number of activations</th>
+        <th style="text-align: left;">Users only subscribed to coach</th>
+    </tr></li>
+    {% for svc_stat in services_stats %}
+        <tr>
+            <td>{{svc_stat.Name}}</td>
+            <td>{{svc_stat.NbUsers}}</td>
+            <td>
+                {% if svc_stat.OneSvcSubedUsers != None %}
+                    {{svc_stat.OneSvcSubedUsers}}
+                {% else %}
+                    NC
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+</table>
 
+<p><b>Data asked in {{ queriesExecutionTime }} ms</b></p>
 {% endblock %}

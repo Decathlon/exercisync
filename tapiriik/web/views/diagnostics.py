@@ -26,6 +26,9 @@ def diag_requireAuth(view):
 
 @diag_requireAuth
 def diag_stats(req):
+    import time
+    time_begin = time.perf_counter_ns()
+
     context = {}
 
     context["userCt"] = db.users.count()
@@ -47,6 +50,10 @@ def diag_stats(req):
             "MongoNbWebhookSubedUsers" : mongo_count_webhook_subscribed_users if active_service.ID == "fitbit" else None,
             "OneSvcSubedUsers" : usr_only_connected_to_coach if active_service.ID == "decathlon" else None
         })
+    
+    time_end = time.perf_counter_ns()
+    time_delta_ms = (time_end - time_begin) // 1000000
+    context["queriesExecutionTime"] = time_delta_ms
 
     return render(req, "diag/services_diag.html", context)
 
