@@ -1,4 +1,3 @@
-import logging
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from tapiriik.settings import DIAG_AUTH_LOGIN_SECRET, DIAG_AUTH_PASSWORD, SITE_VER
