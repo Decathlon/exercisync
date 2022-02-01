@@ -4,26 +4,19 @@
 {% block page_title %}Users stats{% endblock %}
 
 {% block content %}
-<p><b>Total number of users : </b>{{ userCt }}</p>
-<p><b>Total number of connections : </b>{{ connCt }}</p>
+<p><b>Total number of users : </b>{{ userCount }}</p>
+<p><b>Total number of connections : </b>{{ connCount }}</p>
+<p><b>Total number of users only connected to STD : </b>{{ userConnectedOnlySTDCount }}</p>
 
 <table>
     <tr>
         <th style="text-align: left;">Service Name</th>
         <th style="text-align: left;">Number of activations</th>
-        <th style="text-align: left;">Users only subscribed to coach</th>
     </tr></li>
     {% for svc_stat in services_stats %}
         <tr>
             <td>{{svc_stat.Name}}</td>
             <td>{{svc_stat.NbUsers}}</td>
-            <td>
-                {% if svc_stat.OneSvcSubedUsers != None %}
-                    {{svc_stat.OneSvcSubedUsers}}
-                {% else %}
-                    NC
-                {% endif %}
-            </td>
         </tr>
     {% endfor %}
 </table>
