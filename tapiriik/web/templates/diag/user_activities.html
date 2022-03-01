@@ -1,0 +1,69 @@
+{% extends "site.html" %}
+{% block title %}User activities diagnostics{% endblock %}
+
+
+{% block customcss %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.2.0/dist/css/datepicker.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/rubyblue.min.css">
+{% endblock %}
+
+{% block content %}
+    <div class="vtmn-flex vtmn-gap-8">
+
+        <div>
+            <p><b>User id :</b></p>
+            <div class="vtmn-flex vtmn-gap-4 vtmn-h-9">
+                <input disabled type="text" v-model="uid">
+            </div>
+        </div>
+
+        <div>
+            <p><b>Begin date : </b></p>
+            <div class="vtmn-flex vtmn-gap-4 vtmn-h-9">
+                <input class="vtmn-text-input" id="beginDatepicker" :value="beginDate" @hide="changeBeginDate">
+            </div>
+        </div>
+
+        <div>
+            <p><b>End date : </b></p>
+            <div class="vtmn-flex vtmn-gap-4 vtmn-h-9">
+                <input class="vtmn-text-input" id="endDatepicker" :value="endDate" @hide="changeEndDate">
+                <button class="vtmn-h-8 vtmn-my-1" @click="getActivitiesData">Fetch activities</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div>
+        <p><b>Data for user :</b></p>
+        <div id="user-activity-data" v-if="true">
+            <textarea id="editor"></textarea>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block specific-js %}
+	{% if user != none %}
+        <script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.2.0/dist/js/datepicker.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+		<script src="{{VUE_URL}}"></script>
+
+        <script>
+            const uid = "{{uid}}"
+        </script>
+		<script src="{{STATIC_URL}}js/user_activities_diag_handler.js"></script>
+
+        <script>
+            const beginDateSelectorContainer =  document.querySelector('input#beginDatepicker');
+            const beginDatepicker = new Datepicker(beginDateSelectorContainer, {});
+            const endDateSelectorContainer =  document.querySelector('input#endDatepicker');
+            const endDatepicker = new Datepicker(endDateSelectorContainer, {});
+        </script>
+
+	{% endif %}
+{% endblock %}

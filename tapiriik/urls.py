@@ -110,6 +110,8 @@ if 'DIAG_ENABLED' in os.environ and os.environ['DIAG_ENABLED'] == 'True':
     url(r'^diagnostics/graphs$', 'tapiriik.web.views.diag_graphs', {}, name='diagnostics_graphs'),
     url(r'^diagnostics/user/unsu$', 'tapiriik.web.views.diag_unsu', {}, name='diagnostics_unsu'),
     url(r'^diagnostics/userlookup/$', 'tapiriik.web.views.diag_user_lookup', {}, name='diagnostics_user_lookup'),
+    url(r'^diagnostics/api/user_activities$', 'tapiriik.web.views.diag_api_user_activities', {}, name='diagnostics_dashboard'),
+    url(r'^diagnostics/user/(?P<user>[\da-zA-Z]+)/activities$', 'tapiriik.web.views.diag_user_activities', {}, name='diagnostics_user_activities'),
     url(r'^diagnostics/user/(?P<user>.+)$', 'tapiriik.web.views.diag_user', {}, name='diagnostics_user'),
     url(r'^diagnostics/payments/$', 'tapiriik.web.views.diag_payments', {}, name='diagnostics_payments'),
     url(r'^diagnostics/ip$', 'tapiriik.web.views.diag_ip', {}, name='diagnostics_ip'),
