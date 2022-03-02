@@ -326,7 +326,7 @@ def diag_api_user_activities(req):
     begin_filter_date = datetime.strptime(body.get("beginFilterDate"), "%m/%d/%Y")
     end_filter_date = datetime.strptime(body.get("endFilterDate"), "%m/%d/%Y")
     user_activity_record = db.activity_records.find_one({"UserID": ObjectId(body.get("user"))}, {"_id":0, "Activities":1})
-    filtered_user_activities = [
+    user_activities = [
             {
                 "Name": act.get("Name"),
                 "StartTime": act.get("StartTime"),
@@ -334,14 +334,14 @@ def diag_api_user_activities(req):
                 "SportType": act.get("Type"),
                 "Prescence": list(act.get("Prescence",{}).keys()),
                 "Abscence": act.get("Abscence",{})
-            } for act in user_activity_record.get("Activities")# if act.get("Abscence",{}) != {}
+            } for act in user_activity_record.get("Activities")
         ]
     
-    activities_with_asked_day = {
-        "Activities": [act for act in filtered_user_activities if begin_filter_date <= act.get("StartTime") and act.get("StartTime") <= end_filter_date]
+    activities_filtered_by_date = {
+        "Activities": [act for act in user_activities if begin_filter_date <= act.get("StartTime") and act.get("StartTime") <= end_filter_date]
     }
     
-    return JsonResponse(json.loads(json.dumps(activities_with_asked_day, default=str)))
+    return JsonResponse(json.loads(json.dumps(activities_filtered_by_date, default=str)))
 
 @diag_requireAuth
 def diag_unsu(req):
