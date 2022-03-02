@@ -325,6 +325,7 @@ def diag_api_user_activities(req):
     body = json.loads(req.body.decode("utf-8"))
     begin_filter_date = datetime.strptime(body.get("beginFilterDate"), "%m/%d/%Y")
     end_filter_date = datetime.strptime(body.get("endFilterDate"), "%m/%d/%Y")
+
     user_activity_record = db.activity_records.find_one({"UserID": ObjectId(body.get("user"))}, {"_id":0, "Activities":1})
     user_activities = [
             {
@@ -332,7 +333,7 @@ def diag_api_user_activities(req):
                 "StartTime": act.get("StartTime"),
                 "EndTime": act.get("EndTime"),
                 "SportType": act.get("Type"),
-                "Prescence": list(act.get("Prescence",{}).keys()),
+                "Prescence": act.get("Prescence",{}),
                 "Abscence": act.get("Abscence",{})
             } for act in user_activity_record.get("Activities")
         ]
