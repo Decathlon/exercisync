@@ -57,26 +57,32 @@ class FitbitService(ServiceBase):
 
     # source for the mapping : GET https://api.fitbit.com/1/activities.json and https://dev.fitbit.com/build/reference/web-api/activity/#activity-types
     _activityTypeMappings = {
-        #ActivityType.Cycling: "Ride",
-        #ActivityType.MountainBiking: "Ride",
-        ActivityType.Hiking: 90012,
         ActivityType.Running: 90009,
-        ActivityType.Walking: 27,
-        #ActivityType.Snowboarding: "Snowboard",
-        ActivityType.Skating: 15580,
-        #ActivityType.CrossCountrySkiing: "NordicSki",
-        #ActivityType.DownhillSkiing: "AlpineSki",
-        #ActivityType.Swimming: "Swim",
-        ActivityType.Gym: 3015,
-        #ActivityType.Rowing: "Rowing",
-        ActivityType.Elliptical: 20047,
-        #ActivityType.RollerSkiing: "RollerSki",
-        ActivityType.StrengthTraining: 2131,
-        ActivityType.Climbing: 15535,
-        ActivityType.Other: 20,
-        ActivityType.Swimming: 90024,
         ActivityType.Cycling: 90001,
-        #ActivityType.StandUpPaddling: "StandUpPaddling",
+        ActivityType.MountainBiking: 1009,
+        ActivityType.Walking: 90013,
+        ActivityType.Hiking: 90012,
+        ActivityType.DownhillSkiing: 19160,
+        ActivityType.CrossCountrySkiing: 90015,
+        # ActivityType.Snowboarding: "Snowboarding", # No snowboarding in fitbit
+        ActivityType.Skating: 19030,
+        ActivityType.Snowshoeing: 19190,
+        ActivityType.Swimming: 90024,
+        # ActivityType.Wheelchair: "Wheelchair", # No wheelchair ...
+        ActivityType.Rowing: 90014,
+        ActivityType.Kayaking: 18100,
+        # ActivityType.KiteSurfing: "Kite surfing", # No snowboarding in fitbit
+        # ActivityType.WindSurfing: "Wind surfing", # No snowboarding in fitbit
+        ActivityType.Surfing: 18220,
+        ActivityType.InlineSkating: 15591,
+        ActivityType.Elliptical: 90017,
+        ActivityType.Gym: 15300,
+        ActivityType.Climbing: 15535,
+        ActivityType.RollerSkiing: 19160, # Same as DownhillSkiing
+        ActivityType.StrengthTraining: 2130, # Weight lifting
+        # ActivityType.StandUpPaddling: "Stand up paddling", # No StandUpPaddling in fitbit
+        ActivityType.Yoga: 52001,
+        # ActivityType.Other: "Training", # No "Other" sport type
     }
 
     _reverseActivityTypeMappings = {
