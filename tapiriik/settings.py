@@ -11,7 +11,6 @@ import io
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -141,10 +140,11 @@ STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 #     },
 # }
 
-PIPELINE_CSS_COMPRESSOR  = 'pipeline.compressors.cssmin.CSSMinCompressor'
-PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.jsmin.JSMinCompressor'
-
-PIPELINE_DISABLE_WRAPPER = True
+PIPELINE = {
+    'CSS_COMPRESSOR': 'pipeline.compressors.cssmin.CSSMinCompressor',
+    'JS_COMPRESSOR': 'pipeline.compressors.jsmin.JSMinCompressor',
+    'DISABLE_WRAPPER': True,
+}
 
 # Make this unique, and don't share it with anybody.
 # and yes, this is overriden in local_settings.py
@@ -153,13 +153,6 @@ SECRET_KEY = 'vag26gs^t+_y0msoemqo%_5gb*th(i!v$l6##bq9tu2ggcsn13'
 # In production, webservers must have only the public key
 CREDENTIAL_STORAGE_PUBLIC_KEY = b"NotTheRealKeyFYI"
 CREDENTIAL_STORAGE_PRIVATE_KEY = None
-
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -183,29 +176,34 @@ ROOT_URLCONF = 'tapiriik.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'tapiriik.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    "C:/wamp/www/tapiriik/tapiriik/web/templates",
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'tapiriik.web.views.ab_experiment_context',
+                'tapiriik.web.context_processors.user',
+                'tapiriik.web.context_processors.config',
+                'tapiriik.web.context_processors.js_bridge',
+                'tapiriik.web.context_processors.stats',
+                'tapiriik.web.context_processors.providers',
+                'tapiriik.web.context_processors.celebration_mode',
+                'tapiriik.web.context_processors.device_support',
+                'tapiriik.web.context_processors.background_use',
+                'tapiriik.web.context_processors.vue_link',
+                'tapiriik.web.context_processors.decat_club_env_link',
+                'tapiriik.web.context_processors.is_user_from_dkt_club',
+                'django.template.context_processors.static',
+                'django.template.context_processors.request',
+                'django.template.context_processors.i18n'
+            ],
+            'debug': DEBUG
+        },
+    },
+]
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'tapiriik.web.views.ab_experiment_context',
-    'tapiriik.web.context_processors.user',
-    'tapiriik.web.context_processors.config',
-    'tapiriik.web.context_processors.js_bridge',
-    'tapiriik.web.context_processors.stats',
-    'tapiriik.web.context_processors.providers',
-    'tapiriik.web.context_processors.celebration_mode',
-    'tapiriik.web.context_processors.device_support',
-    'tapiriik.web.context_processors.background_use',
-    'tapiriik.web.context_processors.vue_link',
-    'tapiriik.web.context_processors.decat_club_env_link',
-    'tapiriik.web.context_processors.is_user_from_dkt_club',
-    'django.core.context_processors.static',
-    'django.core.context_processors.request',
-    'django.template.context_processors.i18n')
 
 INSTALLED_APPS = (
     'django.contrib.sessions',

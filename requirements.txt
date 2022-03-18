@@ -4,9 +4,9 @@ pytz
 lxml
 dropbox==10.10.0
 python-dateutil
-Django==1.8.19
+Django==1.11.29
 pycryptodome
-django-pipeline==1.5.1
+django-pipeline==1.7.0
 requests_oauthlib==0.4.0
 redis==2.10.6
 django-ipware
