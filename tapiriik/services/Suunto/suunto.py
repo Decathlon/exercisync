@@ -8,7 +8,7 @@ from tapiriik.database import db, redis
 
 
 from datetime import datetime, timedelta
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from urllib.parse import urlencode, parse_qsl
 
 import logging

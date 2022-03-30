@@ -4,7 +4,7 @@ from tapiriik.services.interchange import UploadedActivity, ActivityType, Activi
 from tapiriik.services.api import APIException, APIExcludeActivity, UserException, UserExceptionType
 from tapiriik.database import redis
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from datetime import timedelta, datetime
 import dateutil.parser
 from requests_oauthlib import OAuth1Session

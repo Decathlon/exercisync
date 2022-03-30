@@ -8,7 +8,7 @@ from tapiriik.services.tcx import TCXIO
 from tapiriik.services.gpx import GPXIO
 from lxml import etree
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from datetime import datetime, timedelta
 import dateutil.parser
 import requests

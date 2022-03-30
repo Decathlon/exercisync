@@ -6,7 +6,7 @@ from tapiriik.services.service_base import ServiceAuthenticationType, ServiceBas
 from tapiriik.services.interchange import UploadedActivity, ActivityType, ActivityStatistic, ActivityStatisticUnit, \
     Waypoint, WaypointType, Location, Lap
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from datetime import datetime
 from urllib.parse import urlencode
 import requests

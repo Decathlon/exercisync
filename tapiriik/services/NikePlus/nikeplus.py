@@ -7,7 +7,7 @@ import calendar
 import pytz
 import os
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from tapiriik.settings import WEB_ROOT, NIKEPLUS_CLIENT_ID, NIKEPLUS_CLIENT_SECRET, NIKEPLUS_CLIENT_NAME
 from tapiriik.services.service_base import ServiceAuthenticationType, ServiceBase

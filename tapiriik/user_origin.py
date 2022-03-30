@@ -1,7 +1,8 @@
 import datetime
+from django.utils.deprecation import MiddlewareMixin
 
 
-class UserOriginMiddleware(object):
+class UserOriginMiddleware(MiddlewareMixin):
 
     def process_response(self, request, response):
         COOKIE_NAME = "is_user_from_dkt_club"

@@ -11,7 +11,7 @@ from tapiriik.services.sessioncache import SessionCache
 from tapiriik.services.devices import DeviceIdentifier, DeviceIdentifierType, Device
 from tapiriik.database import cachedb, db
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 import pytz
 from datetime import datetime, timedelta
 import requests

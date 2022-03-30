@@ -9,7 +9,7 @@ from tapiriik.services.tcx import TCXIO
 from tapiriik.services.ratelimiting import RateLimit, RateLimitExceededException
 from lxml import etree
 import copy
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from datetime import datetime, timezone, timedelta
 from urllib.parse import urlencode
 import calendar

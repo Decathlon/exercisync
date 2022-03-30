@@ -6,7 +6,7 @@ from tapiriik.services.auto_pause import AutoPauseCalculator
 from tapiriik.services.api import APIException, UserException, UserExceptionType, APIExcludeActivity
 from tapiriik.services.interchange import UploadedActivity, ActivityType, ActivityStatistic, ActivityStatisticUnit, WaypointType, Waypoint, Location, Lap
 from tapiriik.database import cachedb, redis
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from datetime import datetime, timedelta
 import requests
 import urllib.parse

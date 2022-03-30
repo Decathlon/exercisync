@@ -154,7 +154,7 @@ SECRET_KEY = 'vag26gs^t+_y0msoemqo%_5gb*th(i!v$l6##bq9tu2ggcsn13'
 CREDENTIAL_STORAGE_PUBLIC_KEY = b"NotTheRealKeyFYI"
 CREDENTIAL_STORAGE_PRIVATE_KEY = None
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -167,7 +167,7 @@ MIDDLEWARE_CLASSES = (
     'tapiriik.user_origin.UserOriginMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-)
+]
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"  # file-based sessions on windows are terrible
 

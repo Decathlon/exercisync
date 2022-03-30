@@ -7,7 +7,7 @@ from tapiriik.services.api import APIException, UserException, UserExceptionType
 from tapiriik.services.fit import FITIO
 from tapiriik.services.ratelimiting import RateLimit, RateLimitExceededException, RedisRateLimit
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
 import calendar

@@ -1,7 +1,7 @@
 import datetime
+from django.utils.deprecation import MiddlewareMixin
 
-
-class DeviceSupportMiddleware(object):
+class DeviceSupportMiddleware(MiddlewareMixin):
 
     def process_response(self, request, response):
 

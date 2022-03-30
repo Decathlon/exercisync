@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 import urllib.request
 import logging
 import json

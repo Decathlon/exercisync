@@ -5,7 +5,7 @@ from tapiriik.services.api import APIException, APIWarning, UserException, UserE
 from tapiriik.services.sessioncache import SessionCache
 from tapiriik.payments import ExternalPaymentProvider
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from datetime import datetime, timedelta
 import requests
 import logging

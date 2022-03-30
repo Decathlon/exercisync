@@ -5,7 +5,7 @@ import dateutil.parser
 import pytz
 from dateutil.tz import tzutc
 import requests
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from tapiriik.settings import WEB_ROOT, RWGPS_APIKEY
 from tapiriik.services.service_base import ServiceAuthenticationType, ServiceBase

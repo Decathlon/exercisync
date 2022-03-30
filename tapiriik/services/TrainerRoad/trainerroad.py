@@ -3,7 +3,7 @@ import pytz
 import requests
 import dateutil.parser
 from datetime import datetime, timedelta
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from lxml import etree
 
 from tapiriik.settings import WEB_ROOT

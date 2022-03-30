@@ -11,7 +11,7 @@ from tapiriik.services.api import APIException, UserException, UserExceptionType
 from tapiriik.database import db, redis
 from fitparse.profile import FIELD_TYPES
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
 import calendar

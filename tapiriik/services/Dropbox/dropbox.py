@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from tapiriik.database import cachedb
 from tapiriik.services.api import APIException, ServiceExceptionScope, UserException, UserExceptionType, APIExcludeActivity, ServiceException
 from tapiriik.services.exception_tools import strip_context

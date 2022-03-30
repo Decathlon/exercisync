@@ -7,7 +7,7 @@ from tapiriik.services.fit import FITIO
 from tapiriik.database import db
 
 from datetime import datetime, timedelta
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from urllib.parse import urlencode
 
 import logging

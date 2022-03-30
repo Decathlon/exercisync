@@ -9,7 +9,7 @@ from tapiriik.services.sessioncache import SessionCache
 from urllib.parse import urlparse
 import pytz
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from datetime import datetime, timedelta
 import dateutil.parser
 import requests

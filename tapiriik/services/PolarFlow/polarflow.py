@@ -8,7 +8,7 @@ from tapiriik.services.fit import FITIO
 from tapiriik.database import redis
 
 from datetime import datetime, timedelta
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from urllib.parse import urlencode
 from requests.auth import HTTPBasicAuth
 from io import StringIO

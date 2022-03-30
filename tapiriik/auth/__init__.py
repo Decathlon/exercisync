@@ -8,6 +8,7 @@ from tapiriik.settings import DIAG_AUTH_LOGIN_SECRET, DIAG_AUTH_PASSWORD
 from datetime import datetime, timedelta
 from pymongo.read_preferences import ReadPreference
 from bson.objectid import ObjectId
+from django.utils.deprecation import MiddlewareMixin
 
 import copy
 
@@ -259,7 +260,7 @@ class DiagnosticsUser:
     def Authorize(req):
         req.session["diag_auth"] = True
 
-class SessionAuth:
+class SessionAuth(MiddlewareMixin):
     def process_request(self, req):
         userId = req.session.get("userid")
         isSU = False

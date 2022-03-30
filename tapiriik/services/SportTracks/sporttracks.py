@@ -4,7 +4,7 @@ from tapiriik.services.interchange import UploadedActivity, ActivityType, Activi
 from tapiriik.services.api import APIException, UserException, UserExceptionType, APIExcludeActivity
 from tapiriik.services.sessioncache import SessionCache
 from tapiriik.database import cachedb
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 import pytz
 from datetime import timedelta
 import dateutil.parser

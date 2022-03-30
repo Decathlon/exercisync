@@ -6,7 +6,7 @@ import functools
 
 import requests
 import dateutil
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from smashrun import Smashrun as SmashrunClient
 
 from tapiriik.settings import WEB_ROOT, SMASHRUN_CLIENT_ID, SMASHRUN_CLIENT_SECRET

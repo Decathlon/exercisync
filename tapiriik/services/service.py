@@ -84,7 +84,7 @@ class Service:
 
     def WebInit():
         from tapiriik.settings import WEB_ROOT
-        from django.core.urlresolvers import reverse
+        from django.urls import reverse
         for itm in Service.List():
             itm.WebInit()
             itm.UserDisconnectURL = WEB_ROOT + reverse("auth_disconnect", kwargs={"service": itm.ID})

@@ -6,7 +6,7 @@ from tapiriik.services.interchange import UploadedActivity, ActivityType, Activi
 from tapiriik.services.api import APIException, UserException, UserExceptionType
 from tapiriik.services.fit import FITIO
 from fitparse.utils import FitEOFError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from datetime import date, datetime, timezone, timedelta
 from urllib.parse import urlencode
 from tapiriik.database import redis
