@@ -560,8 +560,7 @@ class FITIO:
 				msg_data_keys = msg_data.keys()
 
 				# We check for the records (waypoints) and the minimal information needed
-				if (msg.name == "record" and "position_lat" in msg_data_keys and "position_long" in msg_data_keys and
-						("altitude" in msg_data_keys or "enhanced_altitude" in msg_data_keys) and "timestamp" in msg_data_keys):
+				if (msg.name == "record" and "position_lat" in msg_data_keys and "position_long" in msg_data_keys and "timestamp" in msg_data_keys):
 					# We append the waypoint to a waypoints list
 					actividict["waypoints"].append({
 						"timestamp": msg_data["timestamp"],
