@@ -329,19 +329,25 @@ def diag_api_connection(req):
     response = None
 
     if "partnerId" in body:
-        connection = db.connections.find_one({"ExternalID": body.get("partnerId")})
+        connection = { "connections": [connection for connection in db.connections.find({"ExternalID": body.get("partnerId")})] }
     elif "hubId" in body:
-        connection = db.connections.find_one({"_id": ObjectId(body.get("hubId"))})
+        if ObjectId.is_valid(body.get("hubId")):
+            connection = db.connections.find_one({"_id": ObjectId(body.get("hubId"))})
+        else:
+            return JsonResponse({
+                "error" : "Invalid parameters",
+                "info" : "The 'hubID' doesn't respect the format specification (24-character hex string)"
+            })
     else:
         return JsonResponse({
             "error" : "Invalid parameters",
             "info" : "You should provide at least a 'partnerId' ou a 'hubId'"
         })
     
-    if connection is None:
+    if connection is None or (type(connection) is dict and len(connection["connections"]) == 0):
         response = {
             "error" : "Connection not found",
-            "info" : "There corresponding to %s" % (body)
+            "info" : "There's no corresponding to %s" % (body)
         }
     else:
         response = json.loads(json.dumps(connection, default=str))

@@ -11,7 +11,7 @@
 {% block content %}
 
         <div>
-            <p><b>Search connection by HUB ID</b></p>
+            <p><b>Search connection by its HUB connection UID :</b></p>
             <div class="vtmn-flex vtmn-gap-4 vtmn-h-9">
                 <input class="vtmn-text-input" type="text" v-model="hubId">
                 <button @click="searchByHubId">Search</button>
@@ -19,7 +19,7 @@
         </div>
 
         <div>
-            <p><b>Search connection by partner external ID :</b></p>
+            <p><b>Search connections by partner external ID :</b></p>
             <div class="vtmn-flex vtmn-gap-4 vtmn-h-9">
                 <input class="vtmn-text-input" type="text" v-model="partnerId">
                 <button @click="searchByPartnerId">Search</button>
