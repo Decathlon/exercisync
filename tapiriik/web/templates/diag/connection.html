@@ -1,0 +1,48 @@
+{% extends "site.html" %}
+{% block title %}Connection diagnostics{% endblock %}
+
+
+{% block customcss %}
+{% comment %} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.2.0/dist/css/datepicker.min.css"> {% endcomment %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/rubyblue.min.css">
+{% endblock %}
+
+{% block content %}
+
+        <div>
+            <p><b>Search connection by HUB ID</b></p>
+            <div class="vtmn-flex vtmn-gap-4 vtmn-h-9">
+                <input class="vtmn-text-input" type="text" v-model="hubId">
+                <button @click="searchByHubId">Search</button>
+            </div>
+        </div>
+
+        <div>
+            <p><b>Search connection by partner external ID :</b></p>
+            <div class="vtmn-flex vtmn-gap-4 vtmn-h-9">
+                <input class="vtmn-text-input" type="text" v-model="partnerId">
+                <button @click="searchByPartnerId">Search</button>
+            </div>
+        </div>
+
+
+    <div>
+        <p><b>Response data :</b></p>
+        <div id="user-activity-data">
+            <textarea id="editor"></textarea>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block specific-js %}
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="{{VUE_URL}}"></script>
+
+    <script src="{{STATIC_URL}}js/connection_diag_handler.js"></script>
+
+{% endblock %}

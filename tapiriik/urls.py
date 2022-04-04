@@ -109,6 +109,8 @@ if 'DIAG_ENABLED' in os.environ and os.environ['DIAG_ENABLED'] == 'True':
         url(r'^diagnostics/graphs$', views.diag_graphs, {}, name='diagnostics_graphs'),
         url(r'^diagnostics/user/unsu$', views.diag_unsu, {}, name='diagnostics_unsu'),
         url(r'^diagnostics/userlookup/$', views.diag_user_lookup, {}, name='diagnostics_user_lookup'),
+        url(r'^diagnostics/connection/$', views.diag_connection, {}, name='diagnostics_connection'),
+        url(r'^diagnostics/api/connections$', views.diag_api_connection, {}, name='diagnostics_api_connection'),
         url(r'^diagnostics/api/user_activities$', views.diag_api_user_activities, {}, name='diagnostics_dashboard'),
         url(r'^diagnostics/user/(?P<user>[\da-zA-Z]+)/activities$', views.diag_user_activities, {}, name='diagnostics_user_activities'),
         url(r'^diagnostics/user/(?P<user>.+)$', views.diag_user, {}, name='diagnostics_user'),

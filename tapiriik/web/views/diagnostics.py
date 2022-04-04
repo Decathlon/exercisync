@@ -315,6 +315,40 @@ def diag_user(req, user):
         return redirect("diagnostics_user", user=user)
     return render(req, "diag/user.html", {"diag_user": userRec})
 
+
+@diag_requireAuth
+def diag_connection(req):
+    return render(req, "diag/connection.html")
+
+
+@require_POST
+@diag_requireAuth
+def diag_api_connection(req):
+    body = json.loads(req.body.decode("utf-8"))
+    connection = None
+    response = None
+
+    if "partnerId" in body:
+        connection = db.connections.find_one({"ExternalID": body.get("partnerId")})
+    elif "hubId" in body:
+        connection = db.connections.find_one({"_id": ObjectId(body.get("hubId"))})
+    else:
+        return JsonResponse({
+            "error" : "Invalid parameters",
+            "info" : "You should provide at least a 'partnerId' ou a 'hubId'"
+        })
+    
+    if connection is None:
+        response = {
+            "error" : "Connection not found",
+            "info" : "There corresponding to %s" % (body)
+        }
+    else:
+        response = json.loads(json.dumps(connection, default=str))
+
+    return JsonResponse(response)
+
+
 @diag_requireAuth
 def diag_user_activities(req, user):
     return render(req, "diag/user_activities.html", {"uid": user})
