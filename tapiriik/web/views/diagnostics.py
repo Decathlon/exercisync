@@ -344,7 +344,7 @@ def diag_api_connection(req):
             "info" : "You should provide at least a 'partnerId' ou a 'hubId'"
         })
     
-    if connection is None or (type(connection) is dict and len(connection["connections"]) == 0):
+    if connection is None or (type(connection) is dict and "connections" in connection and len(connection["connections"]) == 0):
         response = {
             "error" : "Connection not found",
             "info" : "There's no corresponding to %s" % (body)
