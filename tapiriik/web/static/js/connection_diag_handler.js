@@ -13,7 +13,12 @@ var app = new Vue({
         searchByPartnerId(){
             axios.post("/diagnostics/api/connections/search", {"partnerId": this.partnerId})
             .then(response => {this.editor.setValue(JSON.stringify(response.data, null, "\t"))})
-            .catch(error => console.error(error)) 
+            .catch(error => {
+                if (error.response.status < 500){
+                    this.editor.setValue(JSON.stringify(error.response.data, null, "\t"))
+                }
+                console.error(error)
+            })
         },
         searchByConnectionId(){
             axios.get("/diagnostics/api/connections/"+ this.connectionId)
@@ -23,7 +28,7 @@ var app = new Vue({
                     this.editor.setValue(JSON.stringify(error.response.data, null, "\t"))
                 }
                 console.error(error)
-            }) 
+            })
         },
     },
 
