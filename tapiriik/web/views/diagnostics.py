@@ -325,11 +325,23 @@ def diag_connection(req):
 @diag_requireAuth
 def diag_api_search_connection(req):
     body = json.loads(req.body.decode("utf-8"))
-    connections = None
+    result = []
     response = None
 
     if "partnerId" in body:
-        connections = { "connections": [connection for connection in db.connections.find({"ExternalID": body.get("partnerId")})] }
+        partner_id_param_str = str(body.get("partnerId"))
+        if partner_id_param_str.isdigit():
+            partner_id_param_int = int(body.get("partnerId"))
+            result = list(db.connections.find({"ExternalID": partner_id_param_int}))
+            if len(result) == 0:
+                result = list(db.connections.find({"ExternalID": partner_id_param_str}))
+
+        else:
+            result = list(db.connections.find({"ExternalID": partner_id_param_str}))
+
+        connections = {
+            "connections": result
+        }
 
     else:
         return HttpResponseBadRequest("You must provide a 'partnerId'")

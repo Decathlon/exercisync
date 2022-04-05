@@ -11,7 +11,7 @@ var app = new Vue({
     },
     methods: {
         searchByPartnerId(){
-            axios.post("/diagnostics/api/connections/search", {"partnerId": this.partnerId})
+            axios.post("/diagnostics/api/connections/search", {"partnerId": String(this.partnerId)})
             .then(response => {this.editor.setValue(JSON.stringify(response.data, null, "\t"))})
             .catch(error => {
                 if (error.response.status < 500){
