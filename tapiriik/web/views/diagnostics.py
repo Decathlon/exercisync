@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound, JsonResponse
 from django.views.decorators.http import require_POST
 from tapiriik.settings import DIAG_AUTH_LOGIN_SECRET, DIAG_AUTH_PASSWORD, SITE_VER
 from tapiriik.database import *
@@ -323,37 +323,35 @@ def diag_connection(req):
 
 @require_POST
 @diag_requireAuth
-def diag_api_connection(req):
+def diag_api_search_connection(req):
     body = json.loads(req.body.decode("utf-8"))
-    connection = None
+    connections = None
     response = None
 
     if "partnerId" in body:
-        connection = { "connections": [connection for connection in db.connections.find({"ExternalID": body.get("partnerId")})] }
-    elif "hubId" in body:
-        if ObjectId.is_valid(body.get("hubId")):
-            connection = db.connections.find_one({"_id": ObjectId(body.get("hubId"))})
-        else:
-            return JsonResponse({
-                "error" : "Invalid parameters",
-                "info" : "The 'hubID' doesn't respect the format specification (24-character hex string)"
-            })
+        connections = { "connections": [connection for connection in db.connections.find({"ExternalID": body.get("partnerId")})] }
+
     else:
-        return JsonResponse({
-            "error" : "Invalid parameters",
-            "info" : "You should provide at least a 'partnerId' ou a 'hubId'"
-        })
-    
-    if connection is None or (type(connection) is dict and "connections" in connection and len(connection["connections"]) == 0):
-        response = {
-            "error" : "Connection not found",
-            "info" : "There's no corresponding to %s" % (body)
-        }
-    else:
-        response = json.loads(json.dumps(connection, default=str))
+        return HttpResponseBadRequest("You must provide a 'partnerId'")
+
+    response = json.loads(json.dumps(connections, default=str))
 
     return JsonResponse(response)
 
+@diag_requireAuth
+def diag_api_connection_by_id(req, connection_id):
+
+    if not ObjectId.is_valid(connection_id):
+        return HttpResponseBadRequest("The provided connectionId doesn't respect the format specification (24-character hex string)")
+        
+    connection = db.connections.find_one({"_id": ObjectId(connection_id)})
+
+    if connection is None:
+        return HttpResponseNotFound("Connection with id %s not found" % connection_id)
+    
+    response = json.loads(json.dumps(connection, default=str))
+
+    return JsonResponse(response)
 
 @diag_requireAuth
 def diag_user_activities(req, user):

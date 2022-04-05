@@ -13,8 +13,8 @@
         <div>
             <p><b>Search connection by its HUB connection UID :</b></p>
             <div class="vtmn-flex vtmn-gap-4 vtmn-h-9">
-                <input class="vtmn-text-input" type="text" v-model="hubId">
-                <button @click="searchByHubId">Search</button>
+                <input class="vtmn-text-input" type="text" v-model="connectionId">
+                <button @click="searchByConnectionId">Search</button>
             </div>
         </div>
 
@@ -29,7 +29,7 @@
 
     <div>
         <p><b>Response data :</b></p>
-        <div id="user-activity-data">
+        <div id="connections-data">
             <textarea id="editor"></textarea>
         </div>
     </div>

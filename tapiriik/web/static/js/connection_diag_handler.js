@@ -5,20 +5,25 @@ var app = new Vue({
     data() {
         return {
             editor,
-            hubId: "",
+            connectionId: "",
             partnerId: ""
         }
     },
     methods: {
         searchByPartnerId(){
-            axios.post("/diagnostics/api/connections", {"partnerId": this.partnerId})
+            axios.post("/diagnostics/api/connections/search", {"partnerId": this.partnerId})
             .then(response => {this.editor.setValue(JSON.stringify(response.data, null, "\t"))})
             .catch(error => console.error(error)) 
         },
-        searchByHubId(){
-            axios.post("/diagnostics/api/connections", {"hubId": this.hubId})
+        searchByConnectionId(){
+            axios.get("/diagnostics/api/connections/"+ this.connectionId)
             .then(response => {this.editor.setValue(JSON.stringify(response.data, null, "\t"))})
-            .catch(error => console.error(error)) 
+            .catch(error => {
+                if (error.response.status < 500){
+                    this.editor.setValue(JSON.stringify(error.response.data, null, "\t"))
+                }
+                console.error(error)
+            }) 
         },
     },
 
