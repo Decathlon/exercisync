@@ -45,6 +45,7 @@ class User:
 
     def Create(creationIP=None):
         uid = db.users.insert({"Created": datetime.utcnow(), "CreationIP": creationIP})  # will mongodb insert an almost empty doc, i.e. _id?
+        logging.info("Successfully created new HUB user with id : %s" % uid)
         return db.users.with_options(read_preference=ReadPreference.PRIMARY).find_one({"_id": uid})
 
     def GetConnectionRecordsByUser(user):

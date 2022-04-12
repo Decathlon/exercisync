@@ -113,7 +113,7 @@ class Service:
                 service.SubscribeToPartialSyncTrigger(serviceRecord) # The subscription is attached more to the remote account than to the local one, so we subscribe/unsubscribe here rather than in User.ConnectService, etc.
         elif serviceRecord.Authorization != authDetails or (hasattr(serviceRecord, "ExtendedAuthorization") and serviceRecord.ExtendedAuthorization != extendedAuthDetailsForStorage):
             db.connections.update_one({"ExternalID": uid, "Service": service.ID}, {"$set": {"Authorization": authDetails, "ExtendedAuthorization": extendedAuthDetailsForStorage if persistExtendedAuthDetails else None}})
-            logging.info("connection exist for User with ExternalID %s for Partner %s, updating auth tokens" % (serviceRecord.ExternalID, serviceRecord.service.ID))
+            logging.info("connection exist for User with ExternalID %s for Partner %s, updating auth tokens" % (serviceRecord.ExternalID, serviceRecord.Service.ID))
 
         # if not persisted, these details are stored in the cache db so they don't get backed up
         if service.RequiresExtendedAuthorizationDetails:
