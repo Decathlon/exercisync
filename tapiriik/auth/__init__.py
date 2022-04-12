@@ -116,6 +116,7 @@ class User:
             user["ConnectedServices"] = []
         delta = False
         if existingUser is not None:
+            logging.info("Existing user %s already connected to %s with connection ID %s and partner user id %s. Mergin to the new user %s" % (existingUser.get("_id"), serviceRecord.Service.ID, serviceRecord._id, serviceRecord.ExternalID, user.get("_id")))
             # merge merge merge
 
             # Don't let the user end up with two services of the same type, ever
@@ -159,12 +160,14 @@ class User:
             user["Config"] = existing_config
             delta = True
             db.users.delete_one({"_id": existingUser["_id"]})
+            logging.info("User %s deletted after pre-merge with %s user" % (existingUser.get("_id"), user.get("_id")))
         else:
             if serviceRecord._id not in [x["ID"] for x in user["ConnectedServices"]]:
                 # we might be connecting a second account for the same service
                 for duplicateConn in [x for x in user["ConnectedServices"] if x["Service"] == serviceRecord.Service.ID]:
                     dupeRecord = User.GetConnectionRecord(user, serviceRecord.Service.ID)  # this'll just pick the first connection of type, but we repeat the right # of times anyways
                     Service.DeleteServiceRecord(dupeRecord)
+                    logging.info("User %s was already connected to %s, deletting the old connection with partner user id %s, keeping the new one with partner user id %s" % (user.get("_id"), serviceRecord.Service.ID, dupeRecord.ExternalID, serviceRecord.ExternalID))
                     # We used to call DisconnectService() here, but the results of that call were getting overwritten, which was unfortunate.
                     user["ConnectedServices"] = [x for x in user["ConnectedServices"] if x["Service"] != serviceRecord.Service.ID]
 
@@ -173,6 +176,11 @@ class User:
 
         _sync = Sync()
         db.users.update_one({"_id": user["_id"]}, {'$set':user})
+        if existingUser is not None:
+            logging.info("Fully merged user %s into %s user" % (existingUser.get("_id"), user.get("_id")))
+        else:
+            logging.info("Fully connected %s's user with partner user id %s to %s user" % (serviceRecord.Service.ID, serviceRecord.ExternalID, user.get("_id")))
+
         if delta or (hasattr(serviceRecord, "SyncErrors") and len(serviceRecord.SyncErrors) > 0):  # also schedule an immediate sync if there is an outstanding error (i.e. user reconnected)
             db.connections.update_one({"_id": serviceRecord._id}, {"$unset": {"SyncErrors": {"UserException_Type": UserExceptionType.Authorization}}}) # Pull all auth-related errors from the service so they don't continue to see them while the sync completes.
             db.connections.update_one({"_id": serviceRecord._id}, {"$unset": {"SyncErrors": {"UserException_Type": UserExceptionType.RenewPassword}}}) # Pull all auth-related errors from the service so they don't continue to see them while the sync completes.

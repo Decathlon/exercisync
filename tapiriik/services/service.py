@@ -3,6 +3,7 @@ from .service_record import ServiceRecord
 from tapiriik.database import db, cachedb
 from bson.objectid import ObjectId
 from pymongo import ReadPreference
+import logging
 
 # Really don't know why I didn't make most of this part of the ServiceBase.
 class Service:
@@ -103,7 +104,8 @@ class Service:
         # Should really figure out how to mangle pymongo into doing the serialization for me...
         extendedAuthDetailsForStorage = CredentialStore.FlattenShadowedCredentials(extendedAuthDetails) if extendedAuthDetails else None
         if serviceRecord is None:
-            db.connections.insert({"ExternalID": uid, "Service": service.ID, "SynchronizedActivities": [], "Authorization": authDetails, "ExtendedAuthorization": extendedAuthDetailsForStorage if persistExtendedAuthDetails else None})
+            connection_id = db.connections.insert({"ExternalID": uid, "Service": service.ID, "SynchronizedActivities": [], "Authorization": authDetails, "ExtendedAuthorization": extendedAuthDetailsForStorage if persistExtendedAuthDetails else None})
+            logging.info("No connection to %s for User with Partner user ID %s. New connection created with id %s" % (service.ID, uid, connection_id))
             collConnections = db.get_collection('connections', read_preference=ReadPreference.PRIMARY)
             serviceRecord = ServiceRecord(collConnections.find_one({"ExternalID": uid, "Service": service.ID}))
             serviceRecord.ExtendedAuthorization = extendedAuthDetails # So SubscribeToPartialSyncTrigger can use it (we don't save the whole record after this point)
@@ -111,6 +113,7 @@ class Service:
                 service.SubscribeToPartialSyncTrigger(serviceRecord) # The subscription is attached more to the remote account than to the local one, so we subscribe/unsubscribe here rather than in User.ConnectService, etc.
         elif serviceRecord.Authorization != authDetails or (hasattr(serviceRecord, "ExtendedAuthorization") and serviceRecord.ExtendedAuthorization != extendedAuthDetailsForStorage):
             db.connections.update_one({"ExternalID": uid, "Service": service.ID}, {"$set": {"Authorization": authDetails, "ExtendedAuthorization": extendedAuthDetailsForStorage if persistExtendedAuthDetails else None}})
+            logging.info("connection exist for User with ExternalID %s for Partner %s, updating auth tokens" % (serviceRecord.ExternalID, serviceRecord.service.ID))
 
         # if not persisted, these details are stored in the cache db so they don't get backed up
         if service.RequiresExtendedAuthorizationDetails:
