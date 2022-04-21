@@ -608,6 +608,30 @@ class FITIO:
 					actividict["file_id"] = msg_data
 
 
+		# The observation for this Coros only Manipulation is, 
+		# 		they always put a wrong last lap start time.
+		# It can be off by few seconds and even minutes.
+		# Strava seems to accept it anyway (with some wrong figures on their laps stats),
+		# 		but it makes our tests crashes so we do this correction anyway.	
+		if actividict["file_id"].get("manufacturer") == 294 or actividict["file_id"].get("manufacturer") == "coros" :
+			if (len(actividict["laps"]) == 1):
+				# TODO obtain a Coros "1 Lap activity" to see if it also have a wrong start time and if this is relevant
+				last_lap = actividict["laps"][-1]
+				if last_lap.get("start_time") != actividict["sessions"].get("start_time"):
+					# This print is for tests purposes and wont be displayed by django runtime (dev/preprod/prod).
+					print('\n!!! "1 Lap activity" with wrong start_time on its sole lap detected !!!')
+					print("--- The chances this activity is originated from COROS are high. ---\n")
+					last_lap.update({"start_time": actividict["sessions"].get("start_time")})
+					
+			if (len(actividict["laps"]) > 1):
+				last_lap = actividict["laps"][-1]
+				st_last_lap = actividict["laps"][-2]
+
+				# Thanks to python it has created a pointer to the actual data in actividict["laps"][-1],
+				# 		therefore we can use last_lap to update actividict["laps"][-1].
+				last_lap.update({"start_time": st_last_lap.get("timestamp")})
+
+
 		# We check if there is only one session for the moment
 		if len(actividict["sessions"]) == 1:
 			# We create a temp var for simplicity
