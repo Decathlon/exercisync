@@ -28,6 +28,7 @@ class Service:
 
     def List():
         return [
+            GarminHealth,
             RunKeeper,
             Strava,
             PolarFlow,
@@ -48,7 +49,6 @@ class Service:
             Singletracker,
             Decathlon,
             Fitbit,
-            GarminHealth,
             Coros,
             Suunto
         ] + PRIVATE_SERVICES
@@ -58,6 +58,7 @@ class Service:
         # ...but that would require either a) downloading it from evry service or b) storing a lot more activity metadata
         # So, I think this will do for now
         return [
+            GarminHealth,
             TrainerRoad, # Special case, since TR has a lot more data in some very specific areas
             PolarFlow,
             Smashrun,  # TODO: not sure if this is the right place, but it seems to have a lot of data
@@ -78,7 +79,6 @@ class Service:
             Singletracker,
             Decathlon,
             Fitbit,
-            GarminHealth,
             Coros,
             Suunto
         ] + PRIVATE_SERVICES
