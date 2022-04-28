@@ -42,7 +42,7 @@ class GarminHealthService(ServiceBase):
     URI_ACTIVITIES_DETAIL = "https://healthapi.garmin.com/wellness-api/rest/activityDetails"
 
     ID = "garminhealth"
-    DisplayName = "Garmin Health"
+    DisplayName = "Garmin"
     DisplayAbbreviation = "GH"
 
     AuthenticationType = ServiceAuthenticationType.OAuth
