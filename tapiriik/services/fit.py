@@ -664,7 +664,17 @@ class FITIO:
 				)
 
 
-			time_to_use = (
+			timer_time_to_use = (
+				# We should return the elapsed time but for unknown reason it could be 0 and could raise DivisionByZero.
+				actividata.get("total_elapsed_time") if actividata.get("total_elapsed_time", 0) != 0 else
+				# So just in case we try the timer time value and we also check if it is not 0.
+				actividata.get("total_timer_time") if actividata.get("total_timer_time", 0) != 0 else
+				# If they're both 0 it's time to try the delta between activity Start/End
+				(activity.EndTime - activity.StartTime).total_seconds() if 
+					(activity.EndTime - activity.StartTime).total_seconds() != 0 else 1
+			)
+
+			moving_time_to_use = (
 				# We should return the timer time but for unknown reason it could be 0 and could raise DivisionByZero.
 				actividata.get("total_timer_time") if actividata.get("total_timer_time", 0) != 0 else
 				# So just in case we try the elapsed time value and we also check if it is not 0.
@@ -676,13 +686,14 @@ class FITIO:
 			
 			activity.Stats = ActivityStatistics(
 				distance=actividata.get("total_distance"), 
-				timer_time=time_to_use, 
+				timer_time=timer_time_to_use, 
 				# The *3.6 is the m/s to Km/h conversion.
 				# Also implemented the usage of "enhanced values" because Garmin prefer using them.
 				# Also made an last resort fallback to recalculate the speed if all values are None
 				#		and the "filtered_enhanced_speed_msg_data" patch can't get the speed.
 				# It's better than returning a 0 Km/h speed to the user.
 				# The major drawback is that the max speed will be equal to the average one.
+                moving_time=moving_time_to_use,
 				avg_speed=(
 					actividata.get("avg_speed") if actividata.get("avg_speed") != None else 
 					actividata.get("enhanced_avg_speed") if actividata.get("enhanced_avg_speed") != None else 
@@ -866,7 +877,7 @@ class FITIO:
 		subSport = FITIO._subSportMap[act.Type] if act.Type in FITIO._subSportMap else 0
 
 		session_stats = {
-			"total_elapsed_time": act.EndTime - act.StartTime,
+			# "total_elapsed_time": act.EndTime - act.StartTime,
 		}
 
 		# FIT doesn't have different fields for this, but it does have a different interpretation - we eventually need to divide by two in the running case.
@@ -883,8 +894,10 @@ class FITIO:
 			if value is not None:
 				dict[key] = value
 
-		_mapStat(session_stats, "total_moving_time", act.Stats.MovingTime.asUnits(ActivityStatisticUnit.Seconds).Value)
-		_mapStat(session_stats, "total_timer_time", act.Stats.TimerTime.asUnits(ActivityStatisticUnit.Seconds).Value)
+        # Yeah it's confusing but fit timer_time is time without pause and it is corresponding to hub moving time
+        #   fit's total_elapsed_time includes pauses
+		_mapStat(session_stats, "total_timer_time", act.Stats.MovingTime.asUnits(ActivityStatisticUnit.Seconds).Value)
+		_mapStat(session_stats, "total_elapsed_time", act.Stats.TimerTime.asUnits(ActivityStatisticUnit.Seconds).Value)
 		_mapStat(session_stats, "total_distance", act.Stats.Distance.asUnits(ActivityStatisticUnit.Meters).Value)
 		_mapStat(session_stats, "total_calories", act.Stats.Energy.asUnits(ActivityStatisticUnit.Kilocalories).Value)
 		_mapStat(session_stats, "avg_speed", act.Stats.Speed.asUnits(ActivityStatisticUnit.MetersPerSecond).Average)

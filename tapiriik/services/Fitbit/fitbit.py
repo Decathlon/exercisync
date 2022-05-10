@@ -645,8 +645,11 @@ class FitbitService(ServiceBase):
         activity_date = activity.StartTime.strftime("%Y-%m-%d")
         activity_time = activity.StartTime.strftime("%H:%M:%S")
 
-        durationDelta = activity.EndTime - activity.StartTime
-        duration = durationDelta.total_seconds() * 1000
+        if activity.Stats.MovingTime != None:
+            duration = int(activity.Stats.MovingTime.asUnits(ActivityStatisticUnit.Milliseconds).Value)
+        else:
+            durationDelta = activity.EndTime - activity.StartTime
+            duration = durationDelta.total_seconds() * 1000
 
         distance = 0
         if activity.Stats.Distance:

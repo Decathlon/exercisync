@@ -144,6 +144,7 @@ class DecathlonService(ServiceBase):
     
     _unitMap = {
         "duration": "24",
+        "totalduration": "58",
         "distance": "5",
         "kcal" : "23",
         "speedaverage" : "9",
@@ -171,7 +172,7 @@ class DecathlonService(ServiceBase):
         params = {
                   'client_id':DECATHLON_LOGIN_CLIENT_ID,
                   'response_type':'code',
-                  'redirect_uri':WEB_ROOT + reverse("oauth_return", kwargs={"service": "decathlon"}),
+                  'redirect_uri':WEB_ROOT + reverse("oauth_return", kwargs={"service": self.ID}),
                   'state':'1234',
                   'scope':'openid profile sports_tracking_data sports_tracking_data:write'
                   }
@@ -181,7 +182,7 @@ class DecathlonService(ServiceBase):
     def RetrieveAuthorizationToken(self, req, level):
         code = req.GET.get("code")
 
-        params = {"grant_type": "authorization_code", "code": code, "client_id": DECATHLON_LOGIN_CLIENT_ID, "client_secret": DECATHLON_LOGIN_CLIENT_SECRET, "redirect_uri": WEB_ROOT + reverse("oauth_return", kwargs={"service": "decathlon"})}
+        params = {"grant_type": "authorization_code", "code": code, "client_id": DECATHLON_LOGIN_CLIENT_ID, "client_secret": DECATHLON_LOGIN_CLIENT_SECRET, "redirect_uri": WEB_ROOT + reverse("oauth_return", kwargs={"service": self.ID})}
 
         response = requests.get(self.OauthEndpointDecathlonLogin + "/token", params=params)
         if response.status_code != 200:
@@ -559,8 +560,14 @@ class DecathlonService(ServiceBase):
 
         root["name"] = activity.Name
         root["startdate"] = activity.StartTime.strftime("%Y-%m-%dT%H:%M:%S%z")
+
+        moving_duration = None
+        if activity.Stats.MovingTime != None:
+            moving_duration = int(activity.Stats.MovingTime.asUnits(ActivityStatisticUnit.Seconds).Value)
+        
         duration = int((activity.EndTime - activity.StartTime).total_seconds())
-        root["duration"] = duration
+
+        root["duration"] = duration if moving_duration == None else moving_duration
         
         root["sport"] = "/v2/sports/" + self._activityTypeMappings[activity.Type]
         
@@ -572,7 +579,9 @@ class DecathlonService(ServiceBase):
         dataSummaries = {}
         
         # duration 
-        dataSummaries[self._unitMap["duration"]]= duration
+        
+        dataSummaries[self._unitMap["duration"]]= duration if moving_duration == None else moving_duration
+        dataSummaries[self._unitMap["totalduration"]] = duration
 
         if activity.Stats.Distance.Value is not None and activity.Stats.Distance.Value > 0 :
             dataSummaries[self._unitMap["distance"]] = int(activity.Stats.Distance.asUnits(ActivityStatisticUnit.Meters).Value)

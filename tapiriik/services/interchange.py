@@ -523,7 +523,8 @@ class ActivityStatistic:
         (ActivityStatisticUnit.Meters, ActivityStatisticUnit.Yards): 1.09361,
         (ActivityStatisticUnit.Miles, ActivityStatisticUnit.Feet): 5280,
         (ActivityStatisticUnit.Kilocalories, ActivityStatisticUnit.Kilojoules): 4.184,
-        (ActivityStatisticUnit.StepsPerMinute, ActivityStatisticUnit.DoubledStepsPerMinute): 2
+        (ActivityStatisticUnit.StepsPerMinute, ActivityStatisticUnit.DoubledStepsPerMinute): 2,
+        (ActivityStatisticUnit.Seconds, ActivityStatisticUnit.Milliseconds): 1000
     }
     def __init__(self, units, value=None, avg=None, min=None, max=None, gain=None, loss=None):
         self.Value = value
