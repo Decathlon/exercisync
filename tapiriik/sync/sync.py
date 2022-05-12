@@ -104,21 +104,16 @@ class Sync:
         #logger = LoggerManager().get_logger("Sync.PerformGlobalSync")
         _global_logger= logging.getLogger('Sync')
 
-    def getUsersIDFromExternalId(self, users, service):
-        #print('[Sync.getUsersIDFromExternalId]--- Looking for connection')
-        _global_logger.info("Looking for connection")
-
-        """connection_id = db.connections.find_one(
-            {'ExternalID': external_user_id},
-            {'_id': 1}
-        )"""
+    def getUsersIDFromExternalId(self, partner_user_ids, service):
+        users = None
+        _global_logger.info("Looking for connection for external users : %s" % partner_user_ids)
 
         # Find connections with these external ID
         connections = list(db.connections.aggregate(
             [
                 {
                     '$match': {
-                        'ExternalID': {'$in': users}
+                        'ExternalID': {'$in': partner_user_ids}
                     }
                 },
                 {
@@ -129,6 +124,7 @@ class Sync:
             ]
 
         ))
+
         # Find user with these connection ID
         connection_ids = []
         if connections:
@@ -136,7 +132,6 @@ class Sync:
             for connection in connections:
                 connection_ids.append(connection['_id'])
 
-            #print('[Sync.getUsersIDFromExternalId]--- Looking for user')
             _global_logger.info('Looking for user')
             users = db.users.aggregate(
                 [
@@ -147,15 +142,18 @@ class Sync:
                                     'Service': service,
                                     'ID': {'$in': connection_ids}
                                 }
-                            },
-                            "$or": [{"NextSynchronization": {'$gt': datetime.utcnow()}},{"NextSynchronization": None} ]
-                            # "NextSynchronization": {'$gt': datetime.utcnow()}
+                            }
                         }
                     }
                 ]
             )
+        
+        if users is None:
+            logging.warn("No user found connected to %s with ids %s" % (service, partner_user_ids))
+            return []
 
-        return list(users)
+        else:
+            return list(users)
 
     def ScheduleImmediateSync(self, user, exhaustive=None):
         if exhaustive is None:
