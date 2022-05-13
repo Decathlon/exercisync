@@ -908,6 +908,9 @@ class FITIO:
         # Yeah it's confusing but fit timer_time is time without pause and it is corresponding to hub moving time
         #   fit's total_elapsed_time includes pauses
         _mapStat(session_stats, "total_timer_time", act.Stats.MovingTime.asUnits(ActivityStatisticUnit.Seconds).Value)
+        if session_stats.get("total_timer_time") is None:
+            _mapStat(session_stats, "total_timer_time", act.Stats.TimerTime.asUnits(ActivityStatisticUnit.Seconds).Value)
+
         _mapStat(session_stats, "total_elapsed_time", act.Stats.TimerTime.asUnits(ActivityStatisticUnit.Seconds).Value)
         _mapStat(session_stats, "total_distance", act.Stats.Distance.asUnits(ActivityStatisticUnit.Meters).Value)
         _mapStat(session_stats, "total_calories", act.Stats.Energy.asUnits(ActivityStatisticUnit.Kilocalories).Value)
