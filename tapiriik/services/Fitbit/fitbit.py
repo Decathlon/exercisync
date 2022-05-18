@@ -757,7 +757,7 @@ class FitbitService(ServiceBase):
         
         for id in idList:
             # Telling which user has a fitbit trigger event
-            logging.info("\tGot webhook event from FITBIT for ID : %s" % id)
+            logging.info("[WEBHOOK] FITBIT CALLBACK for user id %s" % id)
             redis_key = "fitbit-wh-recent-sync:%s" % id
             # If the user has no recent sync key in redis
             if redis.get(redis_key) == None:

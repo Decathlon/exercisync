@@ -295,7 +295,7 @@ class GarminHealthService(ServiceBase):
                 try:
                     redis.rpush("garminhealth:webhook:%s" % activity['userId'], activity["callbackURL"]+"::"+activity.get("activityName","")+"::"+str(activity["activityId"]))
                     external_user_ids.append(activity['userId'])
-                    logging.info("\tGARMIN CALLBACK user to sync "+ activity['userId'])
+                    logging.info("[WEBHOOK] GARMIN CALLBACK for user id %s, and activity id %s" % (activity['userId'], activity["activityId"]))
                 except KeyError as e:
                     logging.warning("Garmin sent through the webhook an activityFile with no %s defined in the metadata" % e)
 

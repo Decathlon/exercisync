@@ -255,4 +255,5 @@ class PolarFlowService(ServiceBase):
             redis.rpush("polarflow:webhook:%s" % data["user_id"], data["url"])
             external_user_ids.append(data["user_id"])
 
+        logger.info("[WEBHOOK] POLAR CALLBACK for user id %s, and activity url %s" % (data["user_id"], data["url"]))
         return external_user_ids
