@@ -563,7 +563,7 @@ class DecathlonService(ServiceBase):
         root["startdate"] = activity.StartTime.strftime("%Y-%m-%dT%H:%M:%S%z")
 
         moving_duration = None
-        if activity.Stats.MovingTime != None:
+        if activity.Stats.MovingTime is not None and activity.Stats.MovingTime.Value is not None:
             moving_duration = int(activity.Stats.MovingTime.asUnits(ActivityStatisticUnit.Seconds).Value)
         
         duration = int((activity.EndTime - activity.StartTime).total_seconds())
