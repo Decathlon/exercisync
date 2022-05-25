@@ -1,31 +1,33 @@
-from tapiriik.database import db
+import json
 import logging
-import jwt
+from dataclasses import asdict
+from typing import List
+
+from migration.domain.user import User
+from migration.infrastructure.mongo_database import get_user_connected_to_decathlon, get_connection_by_id
 
 
-def get_connection_by_partner_name(partner_name: str):
-    """
-    get connection and filter by partner name
-    :return: list of connection
-    """
-    return [conn for conn in db.connections.find() if conn["Service"] == partner_name]
-
-
-def decathlon_import(connections: list):
-    """
-    import connection type decathlon
-    """
-
-    for connection in connections:
-        authorization_object = connection["Authorization"]
-        token = authorization_object["AccessTokenDecathlonLogin"]
-        headers = jwt.get_unverified_header(token)
-        claim = jwt.decode(token, options={"verify_signature": False})
-        logging.info(headers)
-        logging.info(claim)
+def debug_user_list(users_list: List[User]):
+    [logging.info(json.dumps(asdict(o), indent=4, sort_keys=True, default=str)) for o in users_list]
 
 
 if __name__ == "__main__":
-    users = db.users.find()
-    decathlon_connections = get_connection_by_partner_name("decathlon")
-    decathlon_import(decathlon_connections)
+    users_dict_list = get_user_connected_to_decathlon()
+
+    logging.info("starting export")
+    users = []
+    for user_dict in users_dict_list:
+        user = User(hub_id=user_dict["_id"])
+
+        for service in user_dict["ConnectedServices"]:
+            connection_object = get_connection_by_id(service["ID"])
+
+            if service["Service"] == "decathlon":
+                user.member_id = connection_object.extract_member_id()
+                connection_object.connection_time = connection_object.extract_auth_time()
+
+            user.connected_services.append(connection_object)
+        users.append(user)
+        #debug_user_list(users)
+
+    logging.info(f"user length {len(users)}")
