@@ -235,11 +235,12 @@ class FitbitService(ServiceBase):
         17260: ActivityType.Walking, #	27	Walking, grass track	Walking
         17150: ActivityType.Walking, #	27	Walking, household	Walking
         31: ActivityType.Other, #
-        52001: ActivityType.Other, #	31	Yoga	Yoga
-        52002: ActivityType.Other, #	31	Yoga, Bikram	Yoga
-        52003: ActivityType.Other, #	31	Yoga, Hatha	Yoga
-        52004: ActivityType.Other, #	31	Yoga, Power	Yoga
-        52005: ActivityType.Other, #	31	Yoga, Vinyasa	Yoga
+        52000: ActivityType.Yoga, #	Yoga
+        52001: ActivityType.Yoga, #	Yoga, Ashtanga
+        52002: ActivityType.Yoga, #	Yoga, Bikram	Yoga
+        52003: ActivityType.Yoga, #	Yoga, Hatha	Yoga
+        52004: ActivityType.Yoga, #	Yoga, Power	Yoga
+        52005: ActivityType.Yoga, #	Yoga, Vinyasa	Yoga
         3016: ActivityType.Gym, #	90004	0	6 - 8 inch step	Aerobic step	Dancing
         3017: ActivityType.Gym, #	90004	0	10 - 12 inch step	Aerobic step	Dancing
         3020: ActivityType.Gym, #	90005	0	low impact	Aerobics	Dancing
@@ -263,7 +264,8 @@ class FitbitService(ServiceBase):
         17231: ActivityType.Walking, #	90013	27	5.0 mph, speed walking	Walk	Walking
         17165: ActivityType.Walking, #	90013	27	Walking the dog	Walk	Walking
         1071: ActivityType.Cycling,
-        2131: ActivityType.StrengthTraining
+        2131: ActivityType.StrengthTraining,
+        2040: ActivityType.StrengthTraining,
     }
 
     SupportedActivities = list(_activityTypeMappings.keys())
