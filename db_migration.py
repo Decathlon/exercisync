@@ -5,7 +5,7 @@ from typing import List
 
 from migration.domain.user import User
 from migration.infrastructure.mongo_database import get_user_connected_to_decathlon, get_connection_by_id
-
+from migration.infrastructure.postgre_database import insert_user_list
 
 def debug_user_list(users_list: List[User]):
     [logging.info(json.dumps(asdict(o), indent=4, sort_keys=True, default=str)) for o in users_list]
@@ -31,3 +31,6 @@ if __name__ == "__main__":
         #debug_user_list(users)
 
     logging.info(f"user length {len(users)}")
+
+    insert_user_list(users)
+    

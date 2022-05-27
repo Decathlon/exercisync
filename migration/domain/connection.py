@@ -20,8 +20,10 @@ class Connection:
 
     @staticmethod
     def to_connection(connection_dict: dict) -> Connection:
-        connection = Connection(connection_dict["_id"], connection_dict["ExternalID"], connection_dict["Service"])
-        connection._convert_authorization_object(connection_dict["Authorization"])
+        connection = Connection(
+            connection_dict["_id"], connection_dict["ExternalID"], connection_dict["Service"])
+        connection._convert_authorization_object(
+            connection_dict["Authorization"])
         return connection
 
     def _convert_authorization_object(self, authorization):
@@ -44,11 +46,17 @@ class Connection:
 
     def extract_auth_time(self):
         return jwt.decode(
-            self.authorization.access_token, algorithms=["RS256"], options={"verify_signature": False}
+            self.authorization.access_token, algorithms=["RS256"], options={
+                "verify_signature": False,
+                "verify_exp": False
+            }
         ).get('auth_time')
 
     def extract_member_id(self):
         return jwt.decode(self.authorization.access_token,
                           algorithms=["RS256"],
-                          options={"verify_signature": False}
+                          options={
+                              "verify_signature": False,
+                              "verify_exp": False
+                          }
                           )['sub']
