@@ -268,6 +268,7 @@ MONGO_HOST_API = "localhost"
 MONGO_REPLICA_SET = None
 MONGO_CLIENT_OPTIONS = {}
 MONGO_FULL_WRITE_CONCERN = 1
+POSTGRES_HOST_API = "postgresql://user:[password]@localhost:5432/database"
 
 REDIS_HOST = "localhost"
 REDIS_CLIENT_OPTIONS = {}

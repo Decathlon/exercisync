@@ -16,4 +16,3 @@ django-webpack-loader
 cssmin
 jsmin
 boto3
-pyjwt
