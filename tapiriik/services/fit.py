@@ -694,17 +694,19 @@ class FITIO:
                 # It's better than returning a 0 Km/h speed to the user.
                 # The major drawback is that the max speed will be equal to the average one.
                 avg_speed_to_use = (
-                    actividata.get("avg_speed") if actividata.get("avg_speed") != None else
-                    actividata.get("enhanced_avg_speed") if actividata.get("enhanced_avg_speed") != None else
-                    
-                    actividata.get("total_distance") / moving_time_to_use *3.6
+                    (
+                        actividata.get("avg_speed") if actividata.get("avg_speed") != None else
+                        actividata.get("enhanced_avg_speed") if actividata.get("enhanced_avg_speed") != None else
+                        actividata.get("total_distance") / moving_time_to_use
+                    ) * 3.6
                 )
 
                 max_speed_to_use = (
-                    actividata.get("max_speed") if actividata.get("max_speed") != None else
-                    actividata.get("enhanced_max_speed") if actividata.get("enhanced_max_speed") != None else
-                    # The *3.6 is the m/s to Km/h conversion.
-                    actividata.get("total_distance") / moving_time_to_use *3.6
+                    (
+                        actividata.get("max_speed") if actividata.get("max_speed") != None else
+                        actividata.get("enhanced_max_speed") if actividata.get("enhanced_max_speed") != None else
+                        actividata.get("total_distance") / moving_time_to_use
+                    ) *3.6
                 )
 
             activity.Stats = ActivityStatistics(
