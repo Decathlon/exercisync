@@ -14,4 +14,7 @@ tapiriik/testing/data/*
 tapiriik/local_settings.py
 /static/
 logs/
+!logs/.gitkeep
+
+
 .DS_Store

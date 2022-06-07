@@ -1,4 +1,5 @@
 # Note: the module name is psycopg, not psycopg3
+from asyncio.log import logger
 from datetime import datetime
 from typing import List
 
@@ -23,7 +24,7 @@ def build_queries(user: User) -> List[tuple]:
         """
         val = (
             DEFAULT_REDIRECT_LOCATION,
-            datetime.now(),
+            connection.connection_time or datetime.now(),
             STATUS_CONNECTION_ACTIVE,
             connection.partner_id,
             user.member_id,
@@ -40,21 +41,22 @@ def build_queries(user: User) -> List[tuple]:
 def insert_user_list(user_list: List[User]):
     # Connect to an existing database
 
-    inserted_lines = None
+    inserted_lines = 0
 
     with psycopg.connect(POSTGRES_HOST_API) as conn:
 
         # Open a cursor to perform database operations
         with conn.cursor() as cur:
             for user in user_list:
-                print(user.hub_id)
+                logger.debug("Inserting user with id %s" % user.hub_id)
                 for connection_query in build_queries(user):
                     cur.execute(*connection_query)
 
             cur.execute("""SELECT count(*) FROM connection""")
             result = cur.fetchone()
-            for r1 in result:
-                inserted_lines = r1
+
+            if result is not None:
+                inserted_lines = result[0]
 
             conn.commit()
 

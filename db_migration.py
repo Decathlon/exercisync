@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from dataclasses import asdict
 from typing import List
 
@@ -15,6 +16,16 @@ def debug_user_list(users_list: List[User]):
 
 
 if __name__ == "__main__":
+    log_file_handler = logging.FileHandler(os.path.abspath("logs") + '/migration.log')
+    log_file_handler.setLevel(logging.DEBUG)
+    log_file_handler.setFormatter(
+        logging.Formatter('%(asctime)s|%(levelname)s\t|%(message)s |%(funcName)s in %(filename)s:%(lineno)d',
+                          '%Y-%m-%d %H:%M:%S'))
+
+    logger = logging.getLogger()
+    logger.addHandler(log_file_handler)
+    logger.setLevel(logging.DEBUG)
+
     users_dict_list = get_user_connected_to_decathlon()
 
     logging.info("starting export")
@@ -26,6 +37,10 @@ if __name__ == "__main__":
                         connected_service["Service"] in PARTNER_WHITELIST]:
 
             connection_object = get_connection_by_id(service["ID"])
+            if connection_object is None:
+                logging.debug(
+                    "Connection with id %s has not been found for user with id %s" % (service["ID"], user_dict["_id"]))
+                continue
 
             if service["Service"] == "decathlon":
                 user.member_id = connection_object.extract_member_id()

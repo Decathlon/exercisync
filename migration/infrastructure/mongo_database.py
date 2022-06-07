@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import List
 
 from bson import ObjectId
@@ -14,8 +16,12 @@ def get_connections_by_partner_name(partner_name: str) -> List[Connection]:
     return [Connection.to_connection(conn) for conn in db.connections.find({"Service": partner_name})]
 
 
-def get_connection_by_id(connection_id: ObjectId) -> Connection:
-    return Connection.to_connection(db.connections.find_one({"_id": connection_id}))
+def get_connection_by_id(connection_id: ObjectId) -> Connection | None:
+    connection_dict = db.connections.find_one({"_id": connection_id})
+    if connection_dict is not None:
+        return Connection.to_connection(connection_dict)
+    else:
+        return None
 
 
 def get_all_users() -> list:

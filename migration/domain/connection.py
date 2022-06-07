@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import datetime
 import logging
 from dataclasses import dataclass
+from datetime import datetime
 
 import jwt
 from bson import ObjectId
@@ -26,7 +26,7 @@ class Connection:
     partner_user_id: str
     partner_name: str
     authorization: Authorization | None = None
-    connection_time: datetime.datetime | None = None
+    connection_time: datetime | None = None
 
     @staticmethod
     def to_connection(connection_dict: dict) -> Connection:
@@ -58,19 +58,17 @@ class Connection:
         else:
             logging.warning("unknown authorization type %s", self.partner_name)
 
-    def extract_auth_time(self):
-        return jwt.decode(
-            self.authorization.access_token, algorithms=["RS256"], options={
-                "verify_signature": False,
-                "verify_exp": False
-            }
+    def extract_auth_time(self) -> datetime | None:
+        auth_time_str = jwt.decode(
+            self.authorization.access_token, algorithms=["RS256"],
+            options={"verify_signature": False, "verify_exp": False}
         ).get('auth_time')
 
+        return datetime.fromtimestamp(int(auth_time_str))
+
     def extract_member_id(self):
-        return jwt.decode(self.authorization.access_token,
-                          algorithms=["RS256"],
-                          options={
-                              "verify_signature": False,
-                              "verify_exp": False
-                          }
-                          )['sub']
+        return jwt.decode(
+            self.authorization.access_token,
+            algorithms=["RS256"],
+            options={"verify_signature": False, "verify_exp": False}
+        )['sub']
