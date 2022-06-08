@@ -1,5 +1,5 @@
 # Note: the module name is psycopg, not psycopg3
-from asyncio.log import logger
+import logging
 from datetime import datetime
 from typing import List
 
@@ -48,7 +48,7 @@ def insert_user_list(user_list: List[User]):
         # Open a cursor to perform database operations
         with conn.cursor() as cur:
             for user in user_list:
-                logger.debug("Inserting user with id %s" % user.hub_id)
+                logging.debug("Inserting user with id %s" % user.hub_id)
                 for connection_query in build_queries(user):
                     cur.execute(*connection_query)
 
