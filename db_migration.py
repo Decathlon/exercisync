@@ -3,6 +3,7 @@ import logging
 import os
 from dataclasses import asdict
 from typing import List
+from datetime import datetime
 
 from migration.domain.user import User
 from migration.infrastructure.mongo_database import get_user_connected_to_decathlon, get_connection_by_id
@@ -16,7 +17,7 @@ def debug_user_list(users_list: List[User]):
 
 
 if __name__ == "__main__":
-    log_file_handler = logging.FileHandler(os.path.abspath("logs") + '/migration.log')
+    log_file_handler = logging.FileHandler(os.path.abspath("logs") + "/migration_%i.log" % int(datetime.now().timestamp()))
     log_file_handler.setLevel(logging.DEBUG)
     log_file_handler.setFormatter(
         logging.Formatter('%(asctime)s|%(levelname)s\t|%(message)s |%(funcName)s in %(filename)s:%(lineno)d',

@@ -64,7 +64,10 @@ class Connection:
             options={"verify_signature": False, "verify_exp": False}
         ).get('auth_time')
 
-        return datetime.fromtimestamp(int(auth_time_str))
+        if auth_time_str is None:
+            return None
+
+        return datetime.fromtimestamp(auth_time_str)
 
     def extract_member_id(self):
         return jwt.decode(
