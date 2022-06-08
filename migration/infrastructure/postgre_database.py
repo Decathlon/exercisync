@@ -40,7 +40,6 @@ def build_queries(user: User) -> List[tuple]:
 
 def insert_user_list(user_list: List[User]):
     # Connect to an existing database
-
     inserted_lines = 0
 
     with psycopg.connect(POSTGRES_HOST_API) as conn:
@@ -48,15 +47,10 @@ def insert_user_list(user_list: List[User]):
         # Open a cursor to perform database operations
         with conn.cursor() as cur:
             for user in user_list:
-                logging.debug("Inserting user with id %s" % user.hub_id)
+                logging.debug("Processing user with id %s" % user.hub_id)
                 for connection_query in build_queries(user):
                     cur.execute(*connection_query)
-
-            cur.execute("""SELECT count(*) FROM connection""")
-            result = cur.fetchone()
-
-            if result is not None:
-                inserted_lines = result[0]
+                    inserted_lines += 1
 
             conn.commit()
 
