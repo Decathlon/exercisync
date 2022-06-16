@@ -1,13 +1,39 @@
 from tapiriik.database import db
-from tapiriik.services import ServiceRecord, service_record
+from tapiriik.services import ServiceRecord
 from unittest.case import TestCase
 from bson.objectid import ObjectId
 from tapiriik.services import UserExceptionType
+from datetime import datetime
+
+
+std_connection_record_dict_with_400_sync_error = {
+    "_id": ObjectId(),
+    "ExternalID": 'fake_id',
+    "Service": 'decathlon',
+    "SynchronizedActivities": [],
+    "Authorization": {
+        "AccessTokenDecathlonLogin": 'fake_one',
+        "AccessTokenDecathlonLoginExpiresAt": 1655374258.9161086,
+        "RefreshTokenDecathlonLogin": 'fake_one'
+    },
+    "ExtendedAuthorization": None,
+    "ExcludedActivities": {},
+    "SyncErrors": [
+        {
+            "Step": 'upload',
+            "Message": 'Could not upload activity 400',
+            "Block": False,
+            "Scope": 'service',
+            "TriggerExhaustive": False,
+            "Timestamp": datetime(2022, 6, 16, 9, 56, 0, 702000)
+        }
+    ]
+}
 
 
 def create_test_service_record(with_error=False, with_user_exception=False ,blocking=False, requires_intervention=False, auth_user_exception_type=False):
     return ServiceRecord({
-        '_id': ObjectId("".join(["1" for x in range(24)])),
+        '_id': ObjectId(),
         'SyncErrors': [
             {
                 'Block': blocking,
@@ -25,10 +51,18 @@ def create_test_service_record(with_error=False, with_user_exception=False ,bloc
 class TestHasAuthSyncError(TestCase):
 
     #
+    # Production issue test case
+    #
+    def test_std_connection_with_400_sync_error_return_false(self):
+        service_record = ServiceRecord(std_connection_record_dict_with_400_sync_error)
+        self.assertFalse(service_record.HasAuthSyncError())
+    
+
+    #
     # No sync errors or empty list
     #
     def test_undefined_sync_errors_return_false(self):
-        service_record_dict = {'_id': ObjectId("".join(["1" for x in range(24)]))}
+        service_record_dict = {'_id': ObjectId()}
         service_record = ServiceRecord(service_record_dict)
         self.assertFalse(service_record.HasAuthSyncError())
 
@@ -36,6 +70,96 @@ class TestHasAuthSyncError(TestCase):
         service_record = create_test_service_record(with_error=False)
         self.assertFalse(service_record.HasAuthSyncError())
 
+    def test_sync_errors_has_one_sync_error_without_block_boolean_return_false(self):
+        service_record_dict = {
+            '_id': ObjectId(),
+            'SyncErrors': [
+                {
+                    'UserException': {
+                        "Type": UserExceptionType.Authorization, 
+                        "InterventionRequired": True
+                    }
+                }
+            ]
+        }
+        service_record = ServiceRecord(service_record_dict)
+        self.assertFalse(service_record.HasAuthSyncError())
+
+    def test_sync_errors_has_one_sync_error_with_non_boolean_block_attribute_return_false(self):
+        service_record_dict = {
+            '_id': ObjectId(),
+            'SyncErrors': [
+                {
+                    'UserException': {
+                        "Type": UserExceptionType.Authorization, 
+                        "InterventionRequired": True
+                    },
+                    'Block': "notaboolean"
+                }
+            ]
+        }
+        service_record = ServiceRecord(service_record_dict)
+        self.assertFalse(service_record.HasAuthSyncError())
+
+    def test_sync_errors_has_one_sync_error_with_non_boolean_user_exception_intervention_required_attribute_return_false(self):
+        service_record_dict = {
+            '_id': ObjectId(),
+            'SyncErrors': [
+                {
+                    'UserException': {
+                        "Type": UserExceptionType.Authorization, 
+                        "InterventionRequired": "notaboolean"
+                    },
+                    'Block': True
+                }
+            ]
+        }
+        service_record = ServiceRecord(service_record_dict)
+        self.assertFalse(service_record.HasAuthSyncError())
+
+    def test_sync_errors_has_one_sync_error_with_non_string_user_exception_type_attribute_return_false(self):
+        service_record_dict = {
+            '_id': ObjectId(),
+            'SyncErrors': [
+                {
+                    'UserException': {
+                        "Type": 1337, 
+                        "InterventionRequired": True
+                    },
+                    'Block': True
+                }
+            ]
+        }
+        service_record = ServiceRecord(service_record_dict)
+        self.assertFalse(service_record.HasAuthSyncError())
+
+    def test_sync_errors_is_not_a_list_return_false(self):
+        service_record_dict = {
+            '_id': ObjectId(),
+            'SyncErrors': 1
+        }
+        service_record = ServiceRecord(service_record_dict)
+        self.assertFalse(service_record.HasAuthSyncError())
+
+    def test_sync_errors_list_not_composed_of_dict_return_false(self):
+        service_record_dict = {
+            '_id': ObjectId(),
+            'SyncErrors': [1, 2, 3]
+        }
+        service_record = ServiceRecord(service_record_dict)
+        self.assertFalse(service_record.HasAuthSyncError())
+
+    def test_one_sync_error_with_not_dict_user_exception_return_false(self):
+        service_record_dict = {
+            '_id': ObjectId(),
+            'SyncErrors': [
+                {
+                    'UserException': 1
+                }
+            ]
+        }
+        service_record = ServiceRecord(service_record_dict)
+        self.assertFalse(service_record.HasAuthSyncError())
 
     #
     # Non blocking errors
