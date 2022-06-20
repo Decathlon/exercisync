@@ -207,3 +207,25 @@ class TestHasAuthSyncError(TestCase):
     def test_one_blocking_sync_errors_with_auth_and_intervention_required_user_exception_return_true(self):
         service_record = create_test_service_record(with_error=True, blocking=True, with_user_exception=True, requires_intervention=True, auth_user_exception_type=True)
         self.assertTrue(service_record.HasAuthSyncError())
+
+
+    #
+    # Multiple sync errors test
+    #
+    def test_two_not_auth_sync_errors_return_false(self):
+        service_record = create_test_service_record(with_error=True, blocking=True, with_user_exception=False)
+        service_record_2 = create_test_service_record(with_error=True, blocking=True, with_user_exception=False)
+        service_record.SyncErrors.append(service_record_2.SyncErrors[0])
+        self.assertFalse(service_record.HasAuthSyncError())
+    
+    def test_one_not_auth_sync_errors_and_one_auth_sync_error_return_true(self):
+        service_record = create_test_service_record(with_error=True, blocking=True, with_user_exception=False)
+        service_record_2 = create_test_service_record(with_error=True, blocking=True, with_user_exception=True, requires_intervention=True, auth_user_exception_type=True)
+        service_record.SyncErrors.append(service_record_2.SyncErrors[0])
+        self.assertTrue(service_record.HasAuthSyncError())
+    
+    def test_two_auth_sync_errors_return_true(self):
+        service_record = create_test_service_record(with_error=True, blocking=True, with_user_exception=True, requires_intervention=True, auth_user_exception_type=True)
+        service_record_2 = create_test_service_record(with_error=True, blocking=True, with_user_exception=True, requires_intervention=True, auth_user_exception_type=True)
+        service_record.SyncErrors.append(service_record_2.SyncErrors[0])
+        self.assertTrue(service_record.HasAuthSyncError())
