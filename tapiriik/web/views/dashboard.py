@@ -9,8 +9,10 @@ def dashboard(req):
         return render(req, "static/onboarding.html")
     else:
         if req.user is not None:
-            dkt_svc_record = Service.GetServiceRecordByID(next((svc["ID"] for svc in req.user.get("ConnectedServices") if svc.get("Service") == "decathlon"), None))
-            if dkt_svc_record.HasAuthSyncError():
-                User.Logout(req)
-                return redirect(dkt_svc_record.Service.UserAuthorizationURL)
+            current_user_decathlon_connection_id = next((svc["ID"] for svc in req.user.get("ConnectedServices") if svc.get("Service") == "decathlon"), None)
+            if current_user_decathlon_connection_id is not None:
+                current_user_dkt_svc_record = Service.GetServiceRecordByID(current_user_decathlon_connection_id)
+                if current_user_dkt_svc_record is not None and current_user_dkt_svc_record.HasAuthSyncError():
+                    User.Logout(req)
+                    return redirect(current_user_dkt_svc_record.Service.UserAuthorizationURL)
         return render(req, "dashboard.html")
