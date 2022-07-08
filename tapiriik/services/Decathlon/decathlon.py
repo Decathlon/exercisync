@@ -173,8 +173,7 @@ class DecathlonService(ServiceBase):
                   'client_id':DECATHLON_LOGIN_CLIENT_ID,
                   'response_type':'code',
                   'redirect_uri':WEB_ROOT + reverse("oauth_return", kwargs={"service": self.ID}),
-                  'state':'1234',
-                  'scope':'openid profile sports_tracking_data sports_tracking_data:write'
+                  'state':'1234'
                   }
         self.UserAuthorizationURL = self.OauthEndpointDecathlonLogin +"/authorize?" + urlencode(params)
 
