@@ -237,7 +237,15 @@ class DecathlonService(ServiceBase):
                     "client_secret": DECATHLON_LOGIN_CLIENT_SECRET,
                 })
                 if response.status_code != 200:
-                    raise APIException("No authorization to refresh token", block=True, user_exception=UserException(UserExceptionType.Authorization, intervention_required=True))
+                    raise APIException(
+                        "%i - No authorization to refresh token for DECATHLON user ID %s. Login X-Correlation-Id : %s. Message from login : %s" % (
+                            response.status_code, 
+                            serviceRecord.ExternalID, 
+                            response.headers.get("X-Correlation-Id", "NULL"), 
+                            response.text
+                        ), block=True, user_exception=UserException(UserExceptionType.Authorization, intervention_required=True)
+                    )
+                    
                 data = response.json()
                 authorizationData = {
                     "AccessTokenDecathlonLogin": data["access_token"],
