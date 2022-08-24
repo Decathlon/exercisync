@@ -230,6 +230,7 @@ class DecathlonService(ServiceBase):
                 # Expired access token
                 refreshToken = serviceRecord.Authorization.get("RefreshTokenDecathlonLogin")
 
+                logging.info("Refreshing token for DECATHLON user ID %s" % serviceRecord.ExternalID)
                 response = requests.post(self.OauthEndpointDecathlonLogin + "/token", data={
                     "grant_type": "refresh_token",
                     "refresh_token": refreshToken,
