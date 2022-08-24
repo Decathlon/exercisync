@@ -226,7 +226,7 @@ class DecathlonService(ServiceBase):
 
     def _getAuthHeaders(self, serviceRecord=None):
         if "RefreshTokenDecathlonLogin" in serviceRecord.Authorization :
-            if time.time() > serviceRecord.Authorization.get("AccessTokenExpiresAt", 0) - 60:
+            if time.time() > serviceRecord.Authorization.get("AccessTokenDecathlonLoginExpiresAt", 0) - 60:
                 # Expired access token
                 refreshToken = serviceRecord.Authorization.get("RefreshTokenDecathlonLogin")
 
