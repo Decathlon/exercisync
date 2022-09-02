@@ -17,7 +17,6 @@ from datetime import datetime, timedelta
 from urllib.parse import urlencode
 import calendar
 import requests
-requests.Response()
 from requests.exceptions import JSONDecodeError
 import os
 import logging
