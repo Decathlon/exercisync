@@ -1,5 +1,6 @@
 # Synchronization module for decathloncoach.com
 # (c) 2018 Charles Anssens, charles.anssens@decathlon.com
+from dataclasses import dataclass
 from tapiriik.settings import WEB_ROOT, DECATHLON_CLIENT_SECRET, DECATHLON_CLIENT_ID, DECATHLON_OAUTH_URL, DECATHLON_API_KEY, DECATHLON_API_BASE_URL, DECATHLON_RATE_LIMITS, DECATHLON_LOGIN_CLIENT_SECRET, DECATHLON_LOGIN_CLIENT_ID, DECATHLON_LOGIN_OAUTH_URL, DECATHLON_HUB_CONNECTOR_ID
 from tapiriik.services.ratelimiting import RateLimit, RateLimitExceededException, RedisRateLimit
 from tapiriik.services.service_base import ServiceAuthenticationType, ServiceBase
@@ -16,6 +17,8 @@ from datetime import datetime, timedelta
 from urllib.parse import urlencode
 import calendar
 import requests
+requests.Response()
+from requests.exceptions import JSONDecodeError
 import os
 import logging
 import pytz
@@ -224,6 +227,58 @@ class DecathlonService(ServiceBase):
         '''
         pass
 
+
+    @dataclass
+    class LoginRefreshError:
+        LoginResponseHttpCode: int
+        LoginResponseCorrelationId: str
+        LoginResponseErrorDescription: str
+        StdExternalUserId: str
+
+
+        def is_blocking(self) -> bool:
+            if (self.LoginResponseHttpCode == 500
+                    or self.LoginResponseHttpCode == 502 
+                    or self.LoginResponseHttpCode == 503
+                    or self.LoginResponseHttpCode == 504):
+                return False
+            else:
+                return True
+
+        
+        def to_error_log_message(self):
+            return f"{self.LoginResponseHttpCode} - Unable to refresh token for DECATHLON user ID {self.StdExternalUserId}. Login X-Correlation-ID : {self.LoginResponseCorrelationId}, Login error description : {self.LoginResponseErrorDescription}"
+
+
+        @classmethod
+        def build_from_login_response_and_std_external_user_id(cls, response: requests.Response, std_external_user_id: str):
+            if response.status_code == 200:
+                raise Exception("No error found : Login has responded 200")
+
+            try:
+                response_dict = response.json()
+            except JSONDecodeError:
+                response_error_description = ""
+            else:
+                response_error_description = response_dict.get("error_description")
+            
+            return cls(response.status_code, response.headers.get("X-Correlation-Id", "NULL"), response_error_description, std_external_user_id)
+
+
+        def generate_ApiException_instance(self):
+            return APIException(
+                self.to_error_log_message(), 
+                block=self.is_blocking(),
+                user_exception=UserException(
+                    UserExceptionType.Authorization,
+                    intervention_required=self.is_blocking()
+                )
+            ) 
+
+    
+        
+
+
     def _getAuthHeaders(self, serviceRecord=None):
         if "RefreshTokenDecathlonLogin" in serviceRecord.Authorization :
             if time.time() > serviceRecord.Authorization.get("AccessTokenDecathlonLoginExpiresAt", 0) - 60:
@@ -237,15 +292,11 @@ class DecathlonService(ServiceBase):
                     "client_id": DECATHLON_LOGIN_CLIENT_ID,
                     "client_secret": DECATHLON_LOGIN_CLIENT_SECRET,
                 })
+
+
                 if response.status_code != 200:
-                    raise APIException(
-                        "%i - No authorization to refresh token for DECATHLON user ID %s. Login X-Correlation-Id : %s. Message from login : %s" % (
-                            response.status_code, 
-                            serviceRecord.ExternalID, 
-                            response.headers.get("X-Correlation-Id", "NULL"), 
-                            response.text
-                        ), block=True, user_exception=UserException(UserExceptionType.Authorization, intervention_required=True)
-                    )
+                    login_refresh_error = self.LoginRefreshError.build_from_login_response_and_std_external_user_id(response, serviceRecord.ExternalID)
+                    raise login_refresh_error.generate_ApiException_instance()
                     
                 data = response.json()
                 authorizationData = {
