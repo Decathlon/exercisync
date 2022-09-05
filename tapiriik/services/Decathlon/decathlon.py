@@ -227,46 +227,47 @@ class DecathlonService(ServiceBase):
         pass
 
 
-    @dataclass
-    class LoginRefreshError:
-        LoginResponseHttpCode: int
-        LoginResponseCorrelationId: str
-        LoginResponseErrorDescription: str
-        StdExternalUserId: str
+    # @dataclass
+    class AuthenticationRefreshResponse:
+        ResponseHttpCode: int
+        ResponseCorrelationId: str
+        ExternalId: str
+        ResponseBodyDict: dict
 
+        IsInError: bool=False
+        ResponseErrorDescription: str=""
+        
+        def __init__(self, response: requests.Response, external_user_id: str):
+            self.ResponseHttpCode = response.status_code
+            self.ExternalId = external_user_id
+            self.ResponseCorrelationId = response.headers.get("X-Correlation-Id", "NULL")
+
+            try:
+                self.ResponseBodyDict = response.json()
+            except JSONDecodeError:
+                self.ResponseBodyDict = {}
+
+            if response.status_code != 200:
+                self.IsInError = True
+                self.ResponseErrorDescription = self.ResponseBodyDict.get("error_description", "")
+            
 
         def is_blocking(self) -> bool:
-            if (self.LoginResponseHttpCode == 500
-                    or self.LoginResponseHttpCode == 502 
-                    or self.LoginResponseHttpCode == 503
-                    or self.LoginResponseHttpCode == 504):
-                return False
-            else:
+            if (self.ResponseHttpCode == 400
+                    or self.ResponseHttpCode == 401 
+                    or self.ResponseHttpCode == 403):
                 return True
+            else:
+                return False
 
         
         def to_error_log_message(self):
-            return f"{self.LoginResponseHttpCode} - Unable to refresh token for DECATHLON user ID {self.StdExternalUserId}. Login X-Correlation-ID : {self.LoginResponseCorrelationId}, Login error description : {self.LoginResponseErrorDescription}"
-
-
-        @classmethod
-        def build_from_login_response_and_std_external_user_id(cls, response: requests.Response, std_external_user_id: str):
-            if response.status_code == 200:
-                raise Exception("No error found : Login has responded 200")
-
-            try:
-                response_dict = response.json()
-            except JSONDecodeError:
-                response_error_description = ""
-            else:
-                response_error_description = response_dict.get("error_description")
-            
-            return cls(response.status_code, response.headers.get("X-Correlation-Id", "NULL"), response_error_description, std_external_user_id)
+            return f"{self.ResponseHttpCode} - Unable to refresh token for DECATHLON user ID {self.ExternalId}. Login X-Correlation-ID : {self.ResponseCorrelationId}, Login error description : {self.ResponseErrorDescription}"
 
 
         def generate_ApiException_instance(self):
             return APIException(
-                self.to_error_log_message(), 
+                message=self.to_error_log_message(), 
                 block=self.is_blocking(),
                 user_exception=UserException(
                     UserExceptionType.Authorization,
@@ -292,12 +293,11 @@ class DecathlonService(ServiceBase):
                     "client_secret": DECATHLON_LOGIN_CLIENT_SECRET,
                 })
 
-
-                if response.status_code != 200:
-                    login_refresh_error = self.LoginRefreshError.build_from_login_response_and_std_external_user_id(response, serviceRecord.ExternalID)
-                    raise login_refresh_error.generate_ApiException_instance()
+                authentication_refresh_response = self.AuthenticationRefreshResponse(response, serviceRecord.ExternalID)
+                if authentication_refresh_response.IsInError:
+                    raise authentication_refresh_response.generate_ApiException_instance()
                     
-                data = response.json()
+                data = authentication_refresh_response.ResponseBodyDict
                 authorizationData = {
                     "AccessTokenDecathlonLogin": data["access_token"],
                     "AccessTokenDecathlonLoginExpiresAt": time.time() + int(data["expires_in"]),
