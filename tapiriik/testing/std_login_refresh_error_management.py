@@ -121,7 +121,7 @@ class StdLoginRefreshErrorManagementTest(TestCase):
         # Then
         self.assertFalse(is_blocking)
 
-    
+
     def test_authentication_refresh_response_with_HTTP_code_400_and_a_not_null_correlation_id_should_generate_blocking_api_exception_with_intervention_required_and_a_message_begining_by_400_and_containing_the_same_correlation_id(self):
         # Given
         response_body_dict = {

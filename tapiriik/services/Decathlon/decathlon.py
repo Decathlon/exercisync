@@ -227,7 +227,6 @@ class DecathlonService(ServiceBase):
         pass
 
 
-    # @dataclass
     class AuthenticationRefreshResponse:
         ResponseHttpCode: int
         ResponseCorrelationId: str
@@ -274,9 +273,6 @@ class DecathlonService(ServiceBase):
                     intervention_required=self.is_blocking()
                 )
             ) 
-
-    
-        
 
 
     def _getAuthHeaders(self, serviceRecord=None):
