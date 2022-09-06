@@ -16,7 +16,7 @@ class StdLoginRefreshErrorManagementTest(TestCase):
         auth_refresh_response = DecathlonService.AuthenticationRefreshResponse(response, self.externalID)
 
         # Then
-        self.assertEquals(auth_refresh_response.ResponseErrorDescription, "")
+        self.assertEquals(auth_refresh_response.ErrorDescription, "")
         self.assertFalse(auth_refresh_response.IsInError)
 
 
@@ -29,7 +29,7 @@ class StdLoginRefreshErrorManagementTest(TestCase):
         auth_refresh_response = DecathlonService.AuthenticationRefreshResponse(response, self.externalID)
 
         # Then
-        self.assertEquals(auth_refresh_response.ResponseCorrelationId, "NULL")
+        self.assertEquals(auth_refresh_response.CorrelationId, "NULL")
 
 
     def test_200_response_with_json_body_should_return_authentication_refresh_response_with_its_response_body_dict_equals_to_json_body(self):
@@ -48,7 +48,7 @@ class StdLoginRefreshErrorManagementTest(TestCase):
         auth_refresh_response = DecathlonService.AuthenticationRefreshResponse(response, self.externalID)
 
         # Then
-        self.assertEqual(auth_refresh_response.ResponseBodyDict, response_body_dict)
+        self.assertEqual(auth_refresh_response.Body, response_body_dict)
 
 
     def test_non_200_response_with_json_body_and_a_error_description_key_set_should_return_authentication_refresh_response_with_its_response_error_description_equals_to_the_one_provided(self):
@@ -67,7 +67,7 @@ class StdLoginRefreshErrorManagementTest(TestCase):
         auth_refresh_response = DecathlonService.AuthenticationRefreshResponse(response, self.externalID)
 
         # Then
-        self.assertEqual(auth_refresh_response.ResponseErrorDescription, error_description)
+        self.assertEqual(auth_refresh_response.ErrorDescription, error_description)
 
 
     def test_non_200_response_without_json_body_should_return_authentication_refresh_response_with_empty_string_response_error_description(self):
@@ -79,7 +79,7 @@ class StdLoginRefreshErrorManagementTest(TestCase):
         auth_refresh_response = DecathlonService.AuthenticationRefreshResponse(response, self.externalID)
 
         # Then
-        self.assertEqual(auth_refresh_response.ResponseErrorDescription, "")
+        self.assertEqual(auth_refresh_response.ErrorDescription, "")
 
 
 
