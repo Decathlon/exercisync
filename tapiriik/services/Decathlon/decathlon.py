@@ -1,5 +1,6 @@
 # Synchronization module for decathloncoach.com
 # (c) 2018 Charles Anssens, charles.anssens@decathlon.com
+from dataclasses import dataclass
 from tapiriik.settings import WEB_ROOT, DECATHLON_CLIENT_SECRET, DECATHLON_CLIENT_ID, DECATHLON_OAUTH_URL, DECATHLON_API_KEY, DECATHLON_API_BASE_URL, DECATHLON_RATE_LIMITS, DECATHLON_LOGIN_CLIENT_SECRET, DECATHLON_LOGIN_CLIENT_ID, DECATHLON_LOGIN_OAUTH_URL, DECATHLON_HUB_CONNECTOR_ID
 from tapiriik.services.ratelimiting import RateLimit, RateLimitExceededException, RedisRateLimit
 from tapiriik.services.service_base import ServiceAuthenticationType, ServiceBase
@@ -16,6 +17,7 @@ from datetime import datetime, timedelta
 from urllib.parse import urlencode
 import calendar
 import requests
+from requests.exceptions import JSONDecodeError
 import os
 import logging
 import pytz
@@ -224,6 +226,55 @@ class DecathlonService(ServiceBase):
         '''
         pass
 
+
+    class AuthenticationRefreshResponse:
+        HttpCode: int
+        CorrelationId: str
+        ExternalId: str
+        Body: dict
+
+        IsInError: bool=False
+        ErrorDescription: str=""
+        
+        def __init__(self, response: requests.Response, external_user_id: str):
+            self.HttpCode = response.status_code
+            self.ExternalId = external_user_id
+            self.CorrelationId = response.headers.get("X-Correlation-Id", "NULL")
+
+            try:
+                self.Body = response.json()
+            except JSONDecodeError:
+                self.Body = {}
+
+            if response.status_code != 200:
+                self.IsInError = True
+                self.ErrorDescription = self.Body.get("error_description", "")
+            
+
+        def is_blocking(self) -> bool:
+            if (self.HttpCode == 400
+                    or self.HttpCode == 401 
+                    or self.HttpCode == 403):
+                return True
+            else:
+                return False
+
+        
+        def to_error_log_message(self):
+            return f"{self.HttpCode} - Unable to refresh token for DECATHLON user ID {self.ExternalId}. Login X-Correlation-ID : {self.CorrelationId}, Login error description : {self.ErrorDescription}"
+
+
+        def generate_ApiException_instance(self):
+            return APIException(
+                message=self.to_error_log_message(), 
+                block=self.is_blocking(),
+                user_exception=UserException(
+                    UserExceptionType.Authorization,
+                    intervention_required=self.is_blocking()
+                )
+            ) 
+
+
     def _getAuthHeaders(self, serviceRecord=None):
         if "RefreshTokenDecathlonLogin" in serviceRecord.Authorization :
             if time.time() > serviceRecord.Authorization.get("AccessTokenDecathlonLoginExpiresAt", 0) - 60:
@@ -237,17 +288,12 @@ class DecathlonService(ServiceBase):
                     "client_id": DECATHLON_LOGIN_CLIENT_ID,
                     "client_secret": DECATHLON_LOGIN_CLIENT_SECRET,
                 })
-                if response.status_code != 200:
-                    raise APIException(
-                        "%i - No authorization to refresh token for DECATHLON user ID %s. Login X-Correlation-Id : %s. Message from login : %s" % (
-                            response.status_code, 
-                            serviceRecord.ExternalID, 
-                            response.headers.get("X-Correlation-Id", "NULL"), 
-                            response.text
-                        ), block=True, user_exception=UserException(UserExceptionType.Authorization, intervention_required=True)
-                    )
+
+                authentication_refresh_response = self.AuthenticationRefreshResponse(response, serviceRecord.ExternalID)
+                if authentication_refresh_response.IsInError:
+                    raise authentication_refresh_response.generate_ApiException_instance()
                     
-                data = response.json()
+                data = authentication_refresh_response.Body
                 authorizationData = {
                     "AccessTokenDecathlonLogin": data["access_token"],
                     "AccessTokenDecathlonLoginExpiresAt": time.time() + int(data["expires_in"]),
