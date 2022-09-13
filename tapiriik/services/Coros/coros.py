@@ -300,10 +300,10 @@ class CorosService(ServiceBase):
     def ExternalIDsForPartialSyncTrigger(self, req):
         data = json.loads(req.body.decode("UTF-8"))
         # Get user id to sync
-        external_user_ids = []
+        external_user_ids = set()
 
         for item in data['sportDataList'] :
             if 'openId' in item:
-                external_user_ids.append(item['openId'])
+                external_user_ids.add(item['openId'])
                 logging.info("[WEBHOOK] COROS CALLBACK for user id %s, and activity id %s" % (item['openId'], item['labelId']))
-        return external_user_ids
+        return list(external_user_ids)
