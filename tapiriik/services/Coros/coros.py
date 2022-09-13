@@ -306,5 +306,4 @@ class CorosService(ServiceBase):
             if 'openId' in item:
                 external_user_ids.append(item['openId'])
                 logging.info("[WEBHOOK] COROS CALLBACK for user id %s, and activity id %s" % (item['openId'], item['labelId']))
-                return external_user_ids
-        return []
+        return external_user_ids
