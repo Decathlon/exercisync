@@ -375,6 +375,8 @@ class DecathlonService(ServiceBase):
                     ride_data = ride["dataSummaries"]
 
                     activity.EndTime = activity.StartTime + timedelta(seconds=ride_data.get(self._unitMap["duration"]))
+                    activity.Stats.TimerTime = ActivityStatistic(ActivityStatisticUnit.Seconds, value=ride_data.get(self._unitMap["totalduration"]))
+                    activity.Stats.MovingTime = ActivityStatistic(ActivityStatisticUnit.Seconds, value=ride_data.get(self._unitMap["duration"]))
                     activity.Stats.Distance = ActivityStatistic(ActivityStatisticUnit.Meters, value=ride_data.get(self._unitMap["distance"]))
                     activity.Stats.Energy = ActivityStatistic(ActivityStatisticUnit.Kilocalories, value=ride_data.get(self._unitMap["kcal"]))
                     activity.Stats.HR = ActivityStatistic(ActivityStatisticUnit.BeatsPerMinute, avg=ride_data.get(self._unitMap["hravg"]))
