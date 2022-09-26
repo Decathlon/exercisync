@@ -277,15 +277,10 @@ class SuuntoService(ServiceBase):
         putHeaders = initResp.json()["headers"]
         putHeaders["Content-Type"] = "application/octet-stream"
 
-        # Here we have to simulate a file buffer with the activity bytes
-        # because all my attempts to pass through the "data=" parameter have failed
-        # But passing activity bytes through "files=" parameter works ¯\_(ツ)_/¯
-        from io import BytesIO
-        file_like = BytesIO(FITIO.Dump(activity))
-        files = {'act1.fit': file_like}
+        binary_activity = FITIO.Dump(activity)
 
         # We send the activity through the link sent by suunto.
-        putResp = requests.request("PUT", initResp.json()["url"], files=files, headers=putHeaders)
+        putResp = requests.request("PUT", initResp.json()["url"], data=binary_activity, headers=putHeaders)
         if putResp.status_code != 201:
             raise APIException("Unable to upload activity " + activity.UID + " response " + putResp.text + " status " + str(putResp.status_code))
 
