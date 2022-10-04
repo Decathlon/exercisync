@@ -305,5 +305,6 @@ class CorosService(ServiceBase):
         for item in data['sportDataList'] :
             if 'openId' in item:
                 external_user_ids.add(item['openId'])
-                logging.info("[WEBHOOK] COROS CALLBACK for user id %s, and activity id %s" % (item['openId'], item['labelId']))
+                self._printWebhookMessage(item['labelId'])
+                # logging.info("[WEBHOOK] COROS CALLBACK for user id %s, and activity id %s" % (item['openId'], item['labelId']))
         return list(external_user_ids)

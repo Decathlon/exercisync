@@ -1,3 +1,4 @@
+import logging
 from tapiriik.services.ratelimiting import RateLimit, RateLimitExceededException, RedisRateLimit
 from tapiriik.services.api import ServiceException, UserExceptionType, UserException
 
@@ -167,3 +168,5 @@ class ServiceBase:
         except RateLimitExceededException:
             raise ServiceException("Global rate limit reached", user_exception=UserException(UserExceptionType.RateLimited))
 
+    def _printWebhookMessage(self, partner_user_id):
+        logging.info(f"[SYNC REQUEST] WEBHOOK - The partner {self.ID} has sent a webhook notification for the partner user ID {partner_user_id}")
