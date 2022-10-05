@@ -168,7 +168,7 @@ def server_status_elb(req):
 def server_securitytxt(request):
     lines = [
         "# We strongly appreciate exchange about security for the users",
-        "Contact: mailto:infra@decathloncoach.com",
+        "Contact: mailto:membersport@decathlon.com",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
