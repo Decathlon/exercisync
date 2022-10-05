@@ -502,6 +502,9 @@ class FitbitService(ServiceBase):
 
                     activity.Type = self._reverseActivityTypeMappings[ftbt_activity["activityTypeId"]]
 
+                    activity.Stats.TimerTime = ActivityStatistic(ActivityStatisticUnit.Milliseconds, value=ftbt_activity.get("duration"))
+                    activity.Stats.MovingTime = ActivityStatistic(ActivityStatisticUnit.Milliseconds, value=ftbt_activity.get("duration"))
+
                     if "distance" in ftbt_activity :
                         activity.Stats.Distance = ActivityStatistic(ActivityStatisticUnit.Kilometers,
                                                                 value=ftbt_activity["distance"])
