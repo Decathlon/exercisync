@@ -256,5 +256,4 @@ class PolarFlowService(ServiceBase):
             external_user_ids.append(data["user_id"])
 
         self._printWebhookMessage(data["user_id"])
-        # logger.info("[WEBHOOK] POLAR CALLBACK for user id %s, and activity url %s" % (data["user_id"], data["url"]))
         return external_user_ids

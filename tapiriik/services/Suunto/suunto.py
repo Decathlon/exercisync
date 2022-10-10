@@ -344,5 +344,4 @@ class SuuntoService(ServiceBase):
         # It should not have error management here as it has been done in the first condition.
         redis.rpush("suunto:webhook:%s" % data['username'], data["workoutid"])
         self._printWebhookMessage(data['username'])
-        # logger.info("[WEBHOOK] SUUNTO CALLBACK for user id %s, and activity id %s" % (data['username'], data["workoutid"]))
         return [data['username']]
