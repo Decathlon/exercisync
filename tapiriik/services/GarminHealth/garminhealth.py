@@ -284,7 +284,7 @@ class GarminHealthService(ServiceBase):
         except json.JSONDecodeError:
             logging.warning("No JSON detected in garmin webhook. Here is what the body looks like : \"%s\"" % req.body.decode("UTF-8"))
             data = {}
-        logger.info("GARMIN CALLBACK POKE")
+
         # Get user ids to sync
         external_user_ids = []
         if data.get('activityFiles') != None:
