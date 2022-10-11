@@ -284,7 +284,7 @@ class GarminHealthService(ServiceBase):
         except json.JSONDecodeError:
             logging.warning("No JSON detected in garmin webhook. Here is what the body looks like : \"%s\"" % req.body.decode("UTF-8"))
             data = {}
-        logger.info("GARMIN CALLBACK POKE")
+
         # Get user ids to sync
         external_user_ids = []
         if data.get('activityFiles') != None:
@@ -295,7 +295,8 @@ class GarminHealthService(ServiceBase):
                 try:
                     redis.rpush("garminhealth:webhook:%s" % activity['userId'], activity["callbackURL"]+"::"+activity.get("activityName","")+"::"+str(activity["activityId"]))
                     external_user_ids.append(activity['userId'])
-                    logging.info("[WEBHOOK] GARMIN CALLBACK for user id %s, and activity id %s" % (activity['userId'], activity["activityId"]))
+                    
+                    self._printWebhookMessage(activity['userId'])
                 except KeyError as e:
                     logging.warning("Garmin sent through the webhook an activityFile with no %s defined in the metadata" % e)
 

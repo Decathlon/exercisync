@@ -421,7 +421,8 @@ class DecathlonService(ServiceBase):
         data = json.loads(req.body.decode("UTF-8"))
         # Get user id to sync
         external_user_ids = []
-        logging.info("[WEBHOOK] DECATHLON CALLBACK for user id %s, and activity id %s" % (data['user_id'], data["event"]["ressource_id"]))
+        
+        self._printWebhookMessage(data['user_id'])
 
         if "activity_create" == data["event"]["name"] :
             #test if the activity was uploaded by the hub
