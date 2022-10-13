@@ -1072,8 +1072,15 @@ class SynchronizationTask:
                 processedActivities = 0
 
                 for activity in self._activities:
-                    self._global_logger.info("" + str(activity) + " " + str(activity.UID[:3]) + " from " + str([[y.Service.ID for y in self._serviceConnections if y._id == x][0] for x in activity.ServiceDataCollection.keys()]))
-                    self._global_logger.info("Name: %s Notes: %s Distance: %s%s" % (activity.Name[:15] if activity.Name else "", activity.Notes[:15] if activity.Notes else "", activity.Stats.Distance.Value, activity.Stats.Distance.Units))
+                    activity_origin_partner_name = str([[y.Service.ID for y in self._serviceConnections if y._id == x][0] for x in activity.ServiceDataCollection.keys()][0])
+                    partner_connection_ids:list = list(activity.ServiceDataCollection.keys())
+                    if partner_connection_ids:
+                        partner_service_data = activity.ServiceDataCollection.get(partner_connection_ids[0],{})
+                        origin_partner_activity_id = None if partner_service_data is None else partner_service_data.get("ActivityID")
+                    else:
+                        origin_partner_activity_id = None
+                    self._global_logger.info(f"[SYNC PROCESS] - Ready to download activity for hub user id {self.user['_id']} from partner {activity_origin_partner_name} with partner activity id {origin_partner_activity_id}")
+                    self._global_logger.info(str(activity) + " - Name: %s, PartnerActivityId: %s, Distance: %s%s" % (activity.Name[:15] if activity.Name else "", origin_partner_activity_id, activity.Stats.Distance.Value, activity.Stats.Distance.Units))
                     try:
                         activity.Record = self._findOrCreateActivityRecord(activity) # Make it a member of the activity, to avoid passing it around as a seperate parameter everywhere.
 
