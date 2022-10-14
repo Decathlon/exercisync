@@ -1237,6 +1237,8 @@ class SynchronizationTask:
 
                         full_activity.Record = activity.Record # Some services don't return the same object, so this gets lost, which is meh, but...
 
+                        self._global_logger.info(f"[ACTIVITY DOWNLOAD] - Successfully downloaded activity details for hub user id {self.user['_id']} from partner {activity_origin_partner_name} with partner activity id {origin_partner_activity_id}")
+
                         successful_destination_service_ids = []
 
                         for destinationSvcRecord in eligibleServices:
