@@ -1261,7 +1261,7 @@ class SynchronizationTask:
                                 uploaded_external_id = self._uploadActivity(full_activity, destinationSvcRecord)
                             except UploadException:
                                 continue # At this point it's already been added to the error collection, so we can just bail.
-                            self._global_logger.info("\t  Uploaded")
+                            self._global_logger.info(f"[ACTIVITY UPLOAD] - Successfully uploaded activity for hub user id {self.user['_id']} from partner {activity_origin_partner_name} with source partner activity id {origin_partner_activity_id} to destination partner {destSvc.ID} with destination partner activity ID {uploaded_external_id}")
 
                             activity.Record.MarkAsSynchronizedTo(destinationSvcRecord)
                             successful_destination_service_ids.append(destSvc.ID)
