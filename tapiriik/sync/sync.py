@@ -1245,6 +1245,9 @@ class SynchronizationTask:
                             if heartbeat_callback:
                                 heartbeat_callback(SyncStep.Upload)
                             destSvc = destinationSvcRecord.Service
+
+                            self._global_logger.info(f"[ACTIVITY UPLOAD] - Ready to upload activity for hub user id {self.user['_id']} from partner {activity_origin_partner_name} with source partner activity id {origin_partner_activity_id} to destination partner {destSvc.ID}")
+
                             if not destSvc.ReceivesStationaryActivities and full_activity.Stationary:
                                 self._global_logger.info("\t...marked as stationary during download")
                                 activity.Record.MarkAsNotPresentOn(destinationSvcRecord, UserException(UserExceptionType.StationaryUnsupported))
@@ -1256,7 +1259,6 @@ class SynchronizationTask:
                                     continue
 
                             uploaded_external_id = None
-                            self._global_logger.info("\t  Uploading to " + destSvc.ID)
                             try:
                                 uploaded_external_id = self._uploadActivity(full_activity, destinationSvcRecord)
                             except UploadException:
