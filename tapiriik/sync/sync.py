@@ -1038,6 +1038,9 @@ class SynchronizationTask:
                 for conn in sorted(self._serviceConnections,
                                    key=lambda x: x.Service.SupportsExhaustiveListing,
                                    reverse=True):
+
+                    self._global_logger.info(f"[SYNC PROCESS] Ready to get the list of activities to sync for hub user Id {self.user['_id']} from partner {conn.Service.ID}")
+
                     # If we're not going to be doing anything anyways, stop now
                     if len(self._serviceConnections) - len(self._excludedServices) <= 1:
                         raise SynchronizationCompleteException()
