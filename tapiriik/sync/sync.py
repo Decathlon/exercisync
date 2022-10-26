@@ -758,6 +758,8 @@ class SynchronizationTask:
                 self._excludeService(conn, UserException(UserExceptionType.MissingCredentials))
                 return
 
+        svcActivities = []
+        svcExclusions = []
         try:
             self._global_logger.info("Retrieving list from " + svc.ID)
             if not exhaustive or not self._activities:
@@ -788,7 +790,7 @@ class SynchronizationTask:
 
         self._accumulateExclusions(conn, svcExclusions)
         self._accumulateActivities(conn, svcActivities, no_add=no_add)
-        self._global_logger.info(f"[SYNC PROCESS] Successfully got the list of activities to sync for hub user id {self.user['_id']} from partner {conn.Service.ID}")
+        self._global_logger.info(f"[SYNC PROCESS] Successfully listed {len(svcActivities)} activities to sync for hub user id {self.user['_id']} from partner {conn.Service.ID}. {len(svcExclusions)} activities have been excluded from sync")
 
     def _estimateFallbackTZ(self, activities):
         from collections import Counter
