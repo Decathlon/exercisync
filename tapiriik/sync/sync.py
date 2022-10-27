@@ -1324,6 +1324,7 @@ class SynchronizationTask:
             self._global_logger.exception("Core sync exception")
             raise
         else:
+            self._global_logger.info(f"[SYNC END] Synchronization ended successfully for hub user id {self.user['_id']}")
             self._global_logger.info("Finished sync for %s (worker %d)" % (self.user["_id"], os.getpid()))
         finally:
             self._closeUserLogging()
