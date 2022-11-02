@@ -86,7 +86,8 @@ class CorosService(ServiceBase):
         ActivityType.CrossCountrySkiing: 19,
         ActivityType.Snowboarding: 21,
         ActivityType.DownhillSkiing: 21,
-        ActivityType.StrengthTraining: 23
+        ActivityType.StrengthTraining: 23,
+        ActivityType.Walking: 31
         # ActivityType.Skating: "IceSkate",
         # ActivityType.Rowing: "Rowing",
         # ActivityType.Elliptical: "Elliptical",
@@ -107,7 +108,8 @@ class CorosService(ServiceBase):
         19: ActivityType.CrossCountrySkiing,
         20: ActivityType.Running,
         21: ActivityType.DownhillSkiing,
-        23: ActivityType.StrengthTraining
+        23: ActivityType.StrengthTraining,
+        31: ActivityType.Walking
     }
 
     SupportedActivities = list(_activityTypeMappings.keys())
@@ -187,8 +189,6 @@ class CorosService(ServiceBase):
 
 
     def DownloadActivityList(self, svcRecord, exhaustive=False):
-        activities = []
-        exclusions = []
         activitiesData = []
 
         # We refresh the token before asking for data
@@ -225,14 +225,19 @@ class CorosService(ServiceBase):
             params["startDate"] = startDate.strftime("%Y%m%d")
             params["endDate"] = endDate.strftime("%Y%m%d")
 
+        return self._map_to_hub_activities(activitiesData)
 
-        for ride in activitiesData:
+    def _map_to_hub_activities(self, activities_data):
+        exclusions = []
+        activities = []
+        for ride in activities_data:
             # Some king of factory design patern for instanciating an activity
             activity = UploadedActivity()
             activity.SourceServiceID = self.ID
-            # Puting UTC by default but it's possible to get possibles timezones and chose it randomly with the possible_timezones method. 
-            # The only problem is the possility to select a non DST timezone for an activity in a DST one.
-            # self.possible_timezones(ride["startTimezone"]/4)  <== keeping this in case of really needing timzones
+            # Putting UTC by default, but it's possible to get possibles
+            # timezones and chose it randomly with the possible_timezones method.
+            # The only problem is the possibility to select a non DST timezone for an activity in a DST one.
+            # self.possible_timezones(ride["startTimezone"]/4)  <== keeping this in case of really needing timezones
             activity.TZ = pytz.timezone("UTC")
             activity.StartTime = datetime.fromtimestamp(ride["startTime"])
             activity.EndTime = datetime.fromtimestamp(ride["endTime"])
@@ -249,12 +254,15 @@ class CorosService(ServiceBase):
 
             activity.Type = self._reverseActivityTypeMappings[ride["mode"]]
             activity.Stats.Distance = ActivityStatistic(ActivityStatisticUnit.Meters, value=ride["distance"])
-            activity.Stats.Speed = ActivityStatistic(ActivityStatisticUnit.SecondsPerKilometer, avg=ride["avgSpeed"] if "avgSpeed" in ride else None, max=None)
-            activity.Stats.RunCadence.update(ActivityStatistic(ActivityStatisticUnit.StepsPerMinute, avg=ride["avgFrequency"]))
-            activity.Stats.Energy = ActivityStatistic(ActivityStatisticUnit.Kilocalories, value=(ride["calorie"]/1000))
+            activity.Stats.Speed = ActivityStatistic(ActivityStatisticUnit.SecondsPerKilometer,
+                                                     avg=ride["avgSpeed"] if "avgSpeed" in ride else None, max=None)
+            activity.Stats.RunCadence.update(
+                ActivityStatistic(ActivityStatisticUnit.StepsPerMinute, avg=ride["avgFrequency"]))
+            activity.Stats.Energy = ActivityStatistic(ActivityStatisticUnit.Kilocalories,
+                                                      value=(ride["calorie"] / 1000))
             activity.FitFileUrl = ride["fitUrl"]
 
-            # As coros don't provide name in activity summary I temporarly put the activity name
+            # As coros don't provide name in activity summary I temporarily put the activity name
             activity.Name = activity.Type
 
             activity.AdjustTZ()
