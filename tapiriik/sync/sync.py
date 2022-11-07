@@ -205,7 +205,10 @@ class Sync:
                     body_dict = json.loads(message.body)
                     receipt_handle = message.receipt_handle
                     #print('[Sync.PerformGlobalSync]--- Sync user : {0}'.format(body_dict['user_id']))
-                    _global_logger.info('Sync user : {0}'.format(body_dict['user_id']))
+                    if body_dict.get("user_id") is None:
+                        _global_logger.warn("[SYNC PROCESS] Got SQS message but can't retreive hub user id from it")
+                    else :
+                        _global_logger.info(f"[SYNC PROCESS] Got SQS message for hub user id {body_dict['user_id']}, beginning its activity synchronisation")
                     self._consumeSyncTask(body_dict, receipt_handle, heartbeat_callback, version)
         else:
             #print('[Sync.PerformGlobalSync]--- Nothing to sync !')
