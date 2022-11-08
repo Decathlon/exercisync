@@ -209,7 +209,7 @@ class Sync:
                     if message_user_id is None:
                         _global_logger.warn("[SYNC PROCESS] Got SQS message but can't retreive hub user id from it")
                     else :
-                        _global_logger.info(f"[SYNC PROCESS] Got SQS message for hub user id {message_user_id}, beginning its activity synchronisation")
+                        _global_logger.info(f"[SYNC PROCESS] Got SQS message for hub user id {message_user_id}, beginning its activity synchronization")
                     self._consumeSyncTask(body_dict, receipt_handle, heartbeat_callback, version)
         else:
             #print('[Sync.PerformGlobalSync]--- Nothing to sync !')
