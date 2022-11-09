@@ -5,6 +5,10 @@ import json
 import boto3
 import logging
 
+class SQSMessageSendingError(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
 logger = logging.getLogger('Helper SQS')
 class SqsManager():
 
@@ -56,8 +60,9 @@ class SqsManager():
                 #print('[Helper SQS]--- Sending %d messages into queue' % len(response['SuccessFul']))
                 logger.info('Sending %d messages into queue' % len(response['SuccessFul']))
             if 'Failed' in response_json:
+                raise SQSMessageSendingError()
                 #print('[Helper SQS]--- Fail sending %d messages into queue' % len(response['Failed']))
-                logger.info('Fail sending %d messages into queue' % len(response['Failed']))
+                # logger.info('Fail sending %d messages into queue' % len(response['Failed']))
 
         else:
             #print('[Helper SQS]--- Nothing to send')
