@@ -73,11 +73,7 @@ while True:
     try:
         sqsManager.send_messages(messages)
     except SQSMessageSendingError:
-        logger.error(f"Failed to send SQS message for generation {generation}")
-
-    except Exception as e:
-        raise e
-
+        logger.warn(f"Failed to send SQS message for generation {generation}")
     else:
         for user in users:
             logger.info(f"[SYNC SCHEDULE] Synchronization planned for hub user id {user['_id']}")
