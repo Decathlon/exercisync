@@ -2,7 +2,7 @@ from tapiriik.database import db
 from tapiriik.settings import _GLOBAL_LOGGER
 from datetime import datetime
 from pymongo.read_preferences import ReadPreference
-from tapiriik.helper.sqs.manager import SqsManager
+from tapiriik.helper.sqs.manager import SqsManager, SQSMessageSendingError
 import time
 import uuid
 import json
@@ -70,7 +70,17 @@ while True:
         messages.append(user_message)
 
     # publish all message
-    sqsManager.send_messages(messages)
+    try:
+        sqsManager.send_messages(messages)
+    except SQSMessageSendingError:
+        logger.error(f"Failed to send SQS message for generation {generation}")
+
+    except Exception as e:
+        raise e
+
+    else:
+        for user in users:
+            logger.info(f"[SYNC SCHEDULE] Synchronization planned for hub user id {user['_id']}")
     #print("[Sync_scheduler]--- Scheduled %d users at %s" % (len(scheduled_ids), datetime.utcnow()))
     #if len(scheduled_ids) > 0 :
     #    logger.info("Scheduled %d users" % (len(scheduled_ids)))
