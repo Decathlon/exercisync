@@ -266,6 +266,7 @@ class FitbitService(ServiceBase):
         1071: ActivityType.Cycling,
         2131: ActivityType.StrengthTraining,
         2040: ActivityType.StrengthTraining,
+        15000: ActivityType.Other,
     }
 
     SupportedActivities = list(_activityTypeMappings.keys())
