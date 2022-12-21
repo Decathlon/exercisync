@@ -81,4 +81,4 @@ while True:
     #if len(scheduled_ids) > 0 :
     #    logger.info("Scheduled %d users" % (len(scheduled_ids)))
 
-    time.sleep(2)
+    time.sleep(3)
