@@ -686,7 +686,9 @@ class FITIO:
             avg_speed_to_use = None
             max_speed_to_use = None
 
-            if actividata.get("total_distance", 0) != 0 and moving_time_to_use != 0:
+            total_distance = actividata.get("total_distance", 0)
+
+            if total_distance != 0 and total_distance is not None and moving_time_to_use != 0:
                 # The *3.6 is the m/s to Km/h conversion.
                 # Also implemented the usage of "enhanced values" because Garmin prefer using them.
                 # Also made an last resort fallback to recalculate the speed if all values are None
