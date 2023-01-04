@@ -6,13 +6,14 @@ from typing import List
 import psycopg
 
 from migration.domain.user import User
-from tapiriik.settings import POSTGRES_HOST_API
+from migration.infrastructure.aes_gcm_encryption import AES_GCM_Engine
+from tapiriik.settings import POSTGRES_HOST_API, AES_GCM_KEY
 
 STATUS_CONNECTION_ACTIVE = "ACTIVE"
 DEFAULT_REDIRECT_LOCATION = "account.decathlon.com"
 
-
 def build_queries(user: User) -> List[tuple]:
+    ag_engine = AES_GCM_Engine(AES_GCM_KEY)
     connection_queries = []
 
     for connection in user.connected_services:
@@ -22,15 +23,31 @@ def build_queries(user: User) -> List[tuple]:
         ) 
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """
+
+        if connection.authorization.access_token is None:
+            connection_access_token = connection.authorization.access_token
+        else :
+            connection_access_token = ag_engine.encrypt(connection.authorization.access_token.encode())
+
+        if connection.authorization.refresh_token is None:
+            connection_refresh_token = connection.authorization.refresh_token
+        else :
+            connection_refresh_token = ag_engine.encrypt(connection.authorization.refresh_token.encode())
+
+        if connection.authorization.access_token_expiration is None:        
+            connection_access_token_expiration = connection.authorization.access_token_expiration
+        else:
+            connection_access_token_expiration = int(connection.authorization.access_token_expiration.timestamp())
+
         val = (
             DEFAULT_REDIRECT_LOCATION,
             connection.connection_time or datetime.now(),
             STATUS_CONNECTION_ACTIVE,
             connection.partner_id,
             user.member_id,
-            connection.authorization.access_token,
-            connection.authorization.refresh_token,
-            connection.authorization.access_token_expiration,
+            connection_access_token,
+            connection_refresh_token,
+            connection_access_token_expiration,
             connection.partner_user_id)
 
         connection_queries.append((query, val))
