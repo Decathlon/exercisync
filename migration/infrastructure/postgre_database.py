@@ -66,7 +66,6 @@ def build_queries(user: User, partner_id_dict) -> List[tuple]:
 
 
 def insert_user_list(user_list: List[User]):
-    logging.info("Connecting to DB")
     partner_id_dict = get_partners_id_dict()
     # Connect to an existing database
     inserted_lines = 0
@@ -80,7 +79,6 @@ def insert_user_list(user_list: List[User]):
                 for connection_query in build_queries(user, partner_id_dict):
                     cur.execute(*connection_query)
                     inserted_lines += 1
-                    logging.info(inserted_lines)
 
             conn.commit()
 
