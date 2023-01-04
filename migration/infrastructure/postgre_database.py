@@ -75,10 +75,13 @@ def insert_user_list(user_list: List[User]):
         # Open a cursor to perform database operations
         with conn.cursor() as cur:
             for user in user_list:
-                logging.debug("Processing user with id %s" % user.hub_id)
-                for connection_query in build_queries(user, partner_id_dict):
-                    cur.execute(*connection_query)
-                    inserted_lines += 1
+                try:
+                    logging.debug("Processing user with id %s" % user.hub_id)
+                    for connection_query in build_queries(user, partner_id_dict):
+                        cur.execute(*connection_query)
+                        inserted_lines += 1
+                except Exception as e:
+                    logging.error(f"Failed to push connections from HUB v1 user id {user.hub_id}, ERROR : {e}")
 
             conn.commit()
 
