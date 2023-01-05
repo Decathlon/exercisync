@@ -22,6 +22,12 @@ def get_partners_id_dict():
     query_result = _execute_query(query, None)
     return {r[1]:r[0] for r in query_result}
 
+def _encrypt_if_not_none(encryption_engine :AES_GCM_Engine, str_to_encrypt: str | None) -> str | bytes | None:
+    if str_to_encrypt is None:
+        return str_to_encrypt
+    else :
+        return encryption_engine.encrypt(str_to_encrypt)
+
 def build_queries(user: User, partner_id_dict) -> List[tuple]:
     ag_engine = AES_GCM_Engine(AES_GCM_KEY)
     connection_queries = []
@@ -29,20 +35,14 @@ def build_queries(user: User, partner_id_dict) -> List[tuple]:
     for connection in user.connected_services:
         query = """
         INSERT INTO connection (
-            redirect_location, creation_date, status, partner_id, member_id, access_token, refresh_token, expires_in, user_id
+            redirect_location, creation_date, status, partner_id, member_id, access_token, refresh_token, expires_in, user_id, oauth_token_secret
         ) 
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """
 
-        if connection.authorization.access_token is None:
-            connection_access_token = connection.authorization.access_token
-        else :
-            connection_access_token = ag_engine.encrypt(connection.authorization.access_token.encode())
-
-        if connection.authorization.refresh_token is None:
-            connection_refresh_token = connection.authorization.refresh_token
-        else :
-            connection_refresh_token = ag_engine.encrypt(connection.authorization.refresh_token.encode())
+        connection_access_token = _encrypt_if_not_none(ag_engine, connection.authorization.access_token)
+        connection_refresh_token = _encrypt_if_not_none(ag_engine, connection.authorization.refresh_token)
+        connection_oauthv1_token_secret = _encrypt_if_not_none(ag_engine, connection.authorization.oauthv1_token_secret)
 
         if connection.authorization.access_token_expiration is None:        
             connection_access_token_expiration = connection.authorization.access_token_expiration
@@ -58,7 +58,8 @@ def build_queries(user: User, partner_id_dict) -> List[tuple]:
             connection_access_token,
             connection_refresh_token,
             connection_access_token_expiration,
-            connection.partner_user_id)
+            connection.partner_user_id,
+            connection_oauthv1_token_secret)
 
         connection_queries.append((query, val))
 

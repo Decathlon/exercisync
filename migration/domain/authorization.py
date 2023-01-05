@@ -9,6 +9,7 @@ class Authorization:
     access_token: str
     refresh_token: str | None = None
     access_token_expiration: datetime | None = None
+    oauthv1_token_secret: str | None = None
 
     @staticmethod
     def from_decathlon(authorization: dict):
@@ -28,6 +29,7 @@ class Authorization:
     def from_garmin(authorization: dict):
         return Authorization(
             access_token=authorization["AccessToken"],
+            oauthv1_token_secret=authorization["AccessTokenSecret"]
         )
 
     @staticmethod

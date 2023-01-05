@@ -11,7 +11,7 @@ class AES_GCM_Engine:
     def encrypt(self, plain_str: str) -> bytes:
         my_nonce = get_random_bytes(12)
         cipher = AES.new(self.key, AES.MODE_GCM, my_nonce)
-        ciphertext, tag = cipher.encrypt_and_digest(plain_str)
+        ciphertext, tag = cipher.encrypt_and_digest(plain_str.encode())
 
         return my_nonce + ciphertext + tag
 
