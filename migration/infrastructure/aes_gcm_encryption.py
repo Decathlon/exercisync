@@ -8,12 +8,12 @@ class AES_GCM_Engine:
     def __init__(self, key):
         self.key = key
 
-    def encrypt(self, plain_str: str) -> bytes:
+    def encrypt(self, plain_str: str) -> str:
         my_nonce = get_random_bytes(12)
         cipher = AES.new(self.key, AES.MODE_GCM, my_nonce)
         ciphertext, tag = cipher.encrypt_and_digest(plain_str.encode())
 
-        return base64.b64encode(my_nonce + ciphertext + tag)
+        return base64.b64encode(my_nonce + ciphertext + tag).decode("ascii")
 
 
     def decrypt(self, encrypted_str, is_b64=False):
@@ -28,4 +28,4 @@ class AES_GCM_Engine:
         cipher = AES.new(self.key, AES.MODE_GCM, nonce)
         newplain_with_tag = cipher.decrypt(local_encrypted_str)
 
-        return newplain_with_tag[:-16]
+        return (newplain_with_tag[:-16]).decode("ascii")
