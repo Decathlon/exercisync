@@ -13,7 +13,7 @@ class AES_GCM_Engine:
         cipher = AES.new(self.key, AES.MODE_GCM, my_nonce)
         ciphertext, tag = cipher.encrypt_and_digest(plain_str.encode())
 
-        return my_nonce + ciphertext + tag
+        return base64.b64encode(my_nonce + ciphertext + tag)
 
 
     def decrypt(self, encrypted_str, is_b64=False):
