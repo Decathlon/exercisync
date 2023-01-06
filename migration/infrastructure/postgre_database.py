@@ -35,19 +35,25 @@ def build_queries(user: User, partner_id_dict) -> List[tuple]:
     for connection in user.connected_services:
         query = """
         INSERT INTO connection (
-            redirect_location, creation_date, status, partner_id, member_id, access_token, refresh_token, expires_in, user_id, oauth_token_secret
+            redirect_location, 
+            creation_date, 
+            status, 
+            partner_id, 
+            member_id, 
+            access_token, 
+            refresh_token, 
+            expires_in, 
+            user_id, 
+            oauth_token_secret,
+            tokens_fetch_date
         ) 
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """
 
         connection_access_token = _encrypt_if_not_none(ag_engine, connection.authorization.access_token)
         connection_refresh_token = _encrypt_if_not_none(ag_engine, connection.authorization.refresh_token)
         connection_oauthv1_token_secret = _encrypt_if_not_none(ag_engine, connection.authorization.oauthv1_token_secret)
 
-        if connection.authorization.access_token_expiration is None:        
-            connection_access_token_expiration = connection.authorization.access_token_expiration
-        else:
-            connection_access_token_expiration = int(connection.authorization.access_token_expiration.timestamp())
 
         val = (
             DEFAULT_REDIRECT_LOCATION,
@@ -57,9 +63,11 @@ def build_queries(user: User, partner_id_dict) -> List[tuple]:
             user.member_id,
             connection_access_token,
             connection_refresh_token,
-            connection_access_token_expiration,
+            connection.authorization.token_exipres_in,
             connection.partner_user_id,
-            connection_oauthv1_token_secret)
+            connection_oauthv1_token_secret,
+            connection.authorization.token_fetch_date
+        )
 
         connection_queries.append((query, val))
 
