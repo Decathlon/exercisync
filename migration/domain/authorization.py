@@ -7,7 +7,7 @@ PARTNERS_TOKEN_EXPIRES_IN_DICT = {
     "strava" : 21600,
     "decathlon" : 889,
     "fitbit" : 28800,
-    "polarflow" : None,
+    "polarflow" : 315360000,
     "garminhealth" : None,
     "coros" : 2592000,
     "suunto" : 86400
@@ -34,7 +34,9 @@ class Authorization:
     @staticmethod
     def from_polar(authorization: dict):
         return Authorization(
-            access_token=authorization["OAuthToken"]
+            access_token=authorization["OAuthToken"],
+            token_exipres_in=PARTNERS_TOKEN_EXPIRES_IN_DICT["polarflow"],
+            token_fetch_date=datetime.now()
         )
 
     @staticmethod
