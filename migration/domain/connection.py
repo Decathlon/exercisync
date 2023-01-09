@@ -9,14 +9,14 @@ from bson import ObjectId
 
 from migration.domain.authorization import Authorization
 
-PARTNERS_NAME_TO_ID_MAPPING = {
-    "decathlon": "178828e4-2ddc-401b-ac06-982273f96dd0",
-    "polarflow": "11d81990-8d7b-47e3-8126-5b279cc75702",
-    "garminhealth": "e8290b89-3c34-4bb2-a860-224c383077d0",
-    "fitbit": "db29e30c-08b3-44d7-9112-c006bd4a85e4",
-    "strava": "2d101565-703e-47bc-853b-b4a3f9de1e82",
-    "coros": "e4600d73-da81-4495-86db-965a1aa25af9",
-    "suunto": "dcf680aa-8148-4f93-a39a-62e0ab8135f1"
+HUBV1_TO_HUBV2_PARTNERS_NAME_MAPPING = {
+    "decathlon": "DECATHLON",
+    "polarflow": "POLAR",
+    "garminhealth": "GARMIN",
+    "fitbit": "FITBIT",
+    "strava": "STRAVA",
+    "coros": "COROS",
+    "suunto": "SUUNTO"
 }
 
 
@@ -35,10 +35,6 @@ class Connection:
         connection._convert_authorization_object(
             connection_dict["Authorization"])
         return connection
-
-    @property
-    def partner_id(self):
-        return PARTNERS_NAME_TO_ID_MAPPING.get(self.partner_name)
 
     def _convert_authorization_object(self, authorization):
         if self.partner_name == "decathlon":
