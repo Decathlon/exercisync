@@ -193,6 +193,7 @@ TEMPLATES = [
                 'tapiriik.web.context_processors.device_support',
                 'tapiriik.web.context_processors.background_use',
                 'tapiriik.web.context_processors.vue_link',
+                'tapiriik.web.context_processors.migration_finished',
                 'tapiriik.web.context_processors.decat_club_env_link',
                 'tapiriik.web.context_processors.is_user_from_dkt_club',
                 'django.template.context_processors.static',
