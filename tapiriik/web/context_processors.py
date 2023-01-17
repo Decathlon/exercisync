@@ -1,11 +1,12 @@
 from tapiriik.services import Service
 from tapiriik.auth import User
 from tapiriik.sync import Sync
-from tapiriik.settings import SITE_VER, PP_WEBSCR, PP_BUTTON_ID, SOFT_LAUNCH_SERVICES, DISABLED_SERVICES, CONNECTION_SERVICES, WITHDRAWN_SERVICES, CELEBRATION_MODES, VUE_URL, DECAT_CLUB_ENV_LINK, MIGRATION_FINISHED
+from tapiriik.settings import SITE_VER, PP_WEBSCR, PP_BUTTON_ID, SOFT_LAUNCH_SERVICES, DISABLED_SERVICES, CONNECTION_SERVICES, WITHDRAWN_SERVICES, CELEBRATION_MODES, VUE_URL, DECAT_CLUB_ENV_LINK
 from tapiriik.database import db
 from datetime import datetime
 from random import randint
 import json
+import os
 
 def providers(req):
     return {"service_providers": Service.List()}
@@ -125,7 +126,7 @@ def vue_link(req):
     return {"VUE_URL": VUE_URL}
 
 def migration_finished(req):
-    return {"MIGRATION_FINISHED": MIGRATION_FINISHED}
+    return {"MIGRATION_FINISHED": False if "MIGRATION_FINISHED" not in os.environ else os.environ["MIGRATION_FINISHED"]}
 
 def decat_club_env_link(req):
     return {"DECAT_CLUB_ENV_LINK": DECAT_CLUB_ENV_LINK}

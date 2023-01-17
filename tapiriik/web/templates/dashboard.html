@@ -164,7 +164,7 @@
 			<div class="mobile:vtmn-block vtmn-flex vtmn-flex-col vtmn-items-center mobile:vtmn-h-auto vtmn-h-full vtmn-place-content-center">
 				<p class="vtmn-text-center mobile:vtmn-text-left">{% trans "I login to my DECATHLON account." %}</p>
                 {% if MIGRATION_FINISHED %}
-                    <a class="button vtmn-mt-2" href="http://account.decathlon.com/connected-applications">{% trans "Login" %}</a>
+                    <a class="button vtmn-mt-2" href="https://account.decathlon.com/connected-applications">{% trans "Login" %}</a>
                 {% else %}
                     {% with decathlon=service_providers|svc_by_id:'decathlon' %}
                         <a class="button vtmn-mt-2" href="{{decathlon.UserAuthorizationURL}}">{% trans "Login" %}</a>
