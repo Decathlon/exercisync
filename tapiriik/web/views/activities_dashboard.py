@@ -4,9 +4,13 @@ from tapiriik.database import db
 from tapiriik.settings import WITHDRAWN_SERVICES
 import json
 import datetime
+import os
+
+def _is_migration_finished():
+    return os.getenv("MIGRATION_FINISHED", "False").lower() in ("true", "1")
 
 def activities_dashboard(req):
-    if not req.user:
+    if not req.user or _is_migration_finished():
         return redirect("/")
     return render(req, "activities-dashboard.html")
 

@@ -6,7 +6,7 @@
 {% block title %}{% if user != none %}{% trans "dashboard" %}{% else %}{% trans "sync your runs, rides & more" %}{% endif %}{% endblock %}
 
 {% block content %}
-{% if user != none %}
+{% if user != none and not MIGRATION_FINISHED %}
 	<p v-if="!isOneSvcConnected">
 		{% trans "Choose the services you want to synchronize to start the synchronization process." %}
 	</p>
