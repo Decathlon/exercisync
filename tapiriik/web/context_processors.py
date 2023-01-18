@@ -126,7 +126,7 @@ def vue_link(req):
     return {"VUE_URL": VUE_URL}
 
 def migration_finished(req):
-    return {"MIGRATION_FINISHED": os.getenv("MIGRATION_FINISHED", False).lower() in ("true", "1")}
+    return {"MIGRATION_FINISHED": os.getenv("MIGRATION_FINISHED", "False").lower() in ("true", "1")}
 
 def decat_club_env_link(req):
     return {"DECAT_CLUB_ENV_LINK": DECAT_CLUB_ENV_LINK}
