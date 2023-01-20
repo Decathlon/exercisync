@@ -6,7 +6,7 @@
 {% block title %}{% if user != none %}{% trans "dashboard" %}{% else %}{% trans "sync your runs, rides & more" %}{% endif %}{% endblock %}
 
 {% block content %}
-{% if user != none and not MIGRATION_FINISHED %}
+{% if user != none and not USER_CONNECTED_SESSION_BLOCKED_AND_LOGIN_BUTTON_REDIRECTED_TO_MY_ACCOUNT %}
 	<p v-if="!isOneSvcConnected">
 		{% trans "Choose the services you want to synchronize to start the synchronization process." %}
 	</p>
@@ -163,7 +163,7 @@
 			<img class="step-img" src="{{STATIC_URL}}img/step1.svg" alt="Step 1">
 			<div class="mobile:vtmn-block vtmn-flex vtmn-flex-col vtmn-items-center mobile:vtmn-h-auto vtmn-h-full vtmn-place-content-center">
 				<p class="vtmn-text-center mobile:vtmn-text-left">{% trans "I login to my DECATHLON account." %}</p>
-                {% if MIGRATION_FINISHED %}
+                {% if USER_CONNECTED_SESSION_BLOCKED_AND_LOGIN_BUTTON_REDIRECTED_TO_MY_ACCOUNT %}
                     <a class="button vtmn-mt-2" href="https://account.decathlon.com/connected-applications">{% trans "Login" %}</a>
                 {% else %}
                     {% with decathlon=service_providers|svc_by_id:'decathlon' %}

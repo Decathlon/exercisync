@@ -6,11 +6,11 @@ import json
 import datetime
 import os
 
-def _is_migration_finished():
-    return os.getenv("MIGRATION_FINISHED", "False").lower() in ("true", "1")
+def _is_user_connected_session_blocked_and_login_button_redirected_to_my_account():
+    return os.getenv("USER_CONNECTED_SESSION_BLOCKED_AND_LOGIN_BUTTON_REDIRECTED_TO_MY_ACCOUNT", "False").lower() in ("true", "1")
 
 def activities_dashboard(req):
-    if not req.user or _is_migration_finished():
+    if not req.user or _is_user_connected_session_blocked_and_login_button_redirected_to_my_account():
         return redirect("/")
     return render(req, "activities-dashboard.html")
 
