@@ -125,8 +125,8 @@ def background_use(req):
 def vue_link(req):
     return {"VUE_URL": VUE_URL}
 
-def migration_finished(req):
-    return {"MIGRATION_FINISHED": os.getenv("MIGRATION_FINISHED", "False").lower() in ("true", "1")}
+def user_connected_session_blocked_and_login_button_redirected_to_my_account(req):
+    return {"USER_CONNECTED_SESSION_BLOCKED_AND_LOGIN_BUTTON_REDIRECTED_TO_MY_ACCOUNT": os.getenv("USER_CONNECTED_SESSION_BLOCKED_AND_LOGIN_BUTTON_REDIRECTED_TO_MY_ACCOUNT", "False").lower() in ("true", "1")}
 
 def decat_club_env_link(req):
     return {"DECAT_CLUB_ENV_LINK": DECAT_CLUB_ENV_LINK}
