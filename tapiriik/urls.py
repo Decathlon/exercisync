@@ -98,6 +98,9 @@ urlpatterns = [
     url(r'^fail_to_disconnect_svc$', TemplateView.as_view(template_name='service_disconnect_failure.html'), name='fail_to_disconnect_svc')
 ]
 
+if os.getenv("HUB_IS_IN_MAINTENANCE", "False").lower() in ("true", "1"):
+    urlpatterns =  [url(r'^(?!(diagnostics)|(sync\/remote_callback\/trigger_partial_sync\/)).*$', views.maintenance, name='maintenance')] + urlpatterns
+
 
 
 if 'DIAG_ENABLED' in os.environ and os.environ['DIAG_ENABLED'] == 'True':

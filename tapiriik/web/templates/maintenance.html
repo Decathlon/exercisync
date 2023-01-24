@@ -1,0 +1,57 @@
+{% load i18n %}
+{% load displayutils %}
+
+<!DOCTYPE html>
+<html lang="fr">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="Description"
+			content="Automatically synchronize your fitness activities between Garmin, Strava and more.">
+		<meta name="Keywords"
+			content="automatic, synchronize, sync, update, copy, transfer, download, fitness, garmin, garmin connect, strava, path, track, heart rate, free, service, gpx, tcx, health, data, service, cycling, running, swimming, walking">
+		<META HTTP-EQUIV="EXPIRES" CONTENT="Thu, 23 Sep 2021 09:25:01 GMT">
+
+		<title>{% trans "Maintenance"%} &bull; Hub by DECATHLON</title>
+
+		<meta name="viewport" content="width=device-width">
+
+		<link rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:ital,wght@0,400;0,700;1,700&display=swap" />
+
+		<link rel="icon" type="image/png" sizes="32x32" href="{{ STATIC_URL }}img/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="{{ STATIC_URL }}img/favicon-16x16.png">
+
+		<link rel="stylesheet" href="{{STATIC_URL}}css/style.css?v=1.3.0">
+
+		<link rel="stylesheet" href="https://unpkg.com/@vtmn/icons@0.3.3/dist/vitamix/font/vitamix.css">
+
+		<link rel="manifest" href="{{ STATIC_URL }}site.webmanifest">
+		<meta name="theme-color" content="#ffffff">
+	</head>
+
+	<body class="vtmn-w-full vtmn-m-0 vtmn-p-0 vtmn-max-w-none">
+		<div class="vtmn-flex vtmn-place-content-center vtmn-h-10 vtmn-p-4 vtmn-shadow-100">
+			<img src="{{STATIC_URL}}img/decathlon.svg" alt="DECATHLON logo">
+        </div>
+
+        <div class="vtmn-flex mobile:vtmn-flex-col">
+            <div>
+                <img src="{{STATIC_URL}}img/maintenance.png" alt="Maintenance logo">
+            </div>
+            <div class="mobile:vtmn-m-4 vtmn-ml-10 vtmn-flex vtmn-flex-col vtmn-place-content-center">
+                <h1 class="vtmn-mb-2 vtmn-typo_display-2">{% trans "Maintenance"%}</h1>
+                <h4 class="vtmn-mb-4">{% trans "It is half time !"%}</h4>
+                <p>{% trans "Sorry for the inconvenience,"%}</p>
+                <p>{% trans "but rest assured, we will be back as soon as possible !"%}</p>
+                <div class="vtmn-mt-4 vtmn-flex">
+                    <a class="button mobile:vtmn-flex-1" href="javascript:location.reload(true)">{% trans "Refresh page"%}</a> 
+                </div>
+            </div>
+        </div>
+
+		
+
+	</body>
+
+</html>
