@@ -1509,3 +1509,25 @@ msgstr "Si le problème persiste n'hésitez pas a nous contacter, nous tâcheron
 
 
 
+msgid "Maintenance"
+msgstr "Maintenance"
+
+msgid "It is half time !"
+msgstr "C'est la mi-temps !"
+
+msgid "Sorry for the inconvenience,"
+msgstr "Désolé pour la gêne occasionée,"
+
+msgid "but rest assured, we will be back as soon as possible !"
+msgstr "mais rassurez-vous, on revient dès que possible !"
+
+msgid "Refresh page"
+msgstr "Actualiser la page"
+
+
+
+
+
+
+
+

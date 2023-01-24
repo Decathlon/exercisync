@@ -13,4 +13,5 @@ from .rollback import *
 from .api.providers import *
 from .oauth import *
 from .config import *
+from .maintenance import *
 # why did I do it this way? should make it less bad
