@@ -8,9 +8,17 @@ import uuid
 import json
 import logging
 
+import os
 
 logger = logging.getLogger('Sync Scheduler')
 logger = _GLOBAL_LOGGER
+
+if os.getenv("HUB_IS_IN_MAINTENANCE", "False").lower() in ("true", "1") or os.getenv("USER_CONNECTED_SESSION_BLOCKED_AND_LOGIN_BUTTON_REDIRECTED_TO_MY_ACCOUNT", "False").lower() in ("true", "1"):
+    while True:
+        logger.info("The HUB is in maintainance or deactivated, doing nothing")
+        time.sleep(60)
+
+
 logger.info("-----[ INITIALIZE SYNC_SCHEDULER ]-----")
 sqsManager = SqsManager()
 sqsManager.get_queue()
