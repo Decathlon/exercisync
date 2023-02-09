@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 from dataclasses import dataclass
+from migration.domain.errors import DecathlonAuthorizationMappingError
 
 PARTNERS_TOKEN_EXPIRES_IN_DICT = {
     "strava" : 21600,
@@ -23,13 +24,16 @@ class Authorization:
 
     @staticmethod
     def from_decathlon(authorization: dict):
-        access_token_expiration=datetime.fromtimestamp(authorization["AccessTokenDecathlonLoginExpiresAt"])
-        return Authorization(
-            access_token=authorization["AccessTokenDecathlonLogin"],
-            refresh_token=authorization["RefreshTokenDecathlonLogin"],
-            token_fetch_date=access_token_expiration-timedelta(seconds=PARTNERS_TOKEN_EXPIRES_IN_DICT["decathlon"]),
-            token_exipres_in=PARTNERS_TOKEN_EXPIRES_IN_DICT["decathlon"],
-        )
+        try:
+            access_token_expiration=datetime.fromtimestamp(authorization["AccessTokenDecathlonLoginExpiresAt"])
+            return Authorization(
+                access_token=authorization["AccessTokenDecathlonLogin"],
+                refresh_token=authorization["RefreshTokenDecathlonLogin"],
+                token_fetch_date=access_token_expiration-timedelta(seconds=PARTNERS_TOKEN_EXPIRES_IN_DICT["decathlon"]),
+                token_exipres_in=PARTNERS_TOKEN_EXPIRES_IN_DICT["decathlon"],
+            )
+        except KeyError as e:
+            raise DecathlonAuthorizationMappingError(authorization, "Can't map the Decathlon authorization dict to Authorization class")
 
     @staticmethod
     def from_polar(authorization: dict):
