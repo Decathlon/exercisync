@@ -23,7 +23,7 @@ if __name__ == "__main__":
     connection_list = []
     connection_push_times = []
 
-    max_skip = 3000
+    max_skip = 155000
     actual_skip = 0
 
     while actual_skip <= max_skip:
