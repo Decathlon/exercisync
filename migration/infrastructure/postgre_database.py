@@ -79,8 +79,6 @@ def insert_connection(connections: List[Connection], partner_ids: dict):
         with conn.cursor() as cur:
             for connection in connections:
                 try:
-                    logging.debug("Processing user with id %s" % connection.hub_id)
-                    
                     cur.execute(*build_queries(connection, partner_ids))
                 except Exception as e:
                     logging.error(f"Failed to push connections from HUB v1 user id {connection.hub_id}, ERROR : {e}")
