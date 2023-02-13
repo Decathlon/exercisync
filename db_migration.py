@@ -34,7 +34,7 @@ if __name__ == "__main__":
                 user_with_connection = user_with_connections_cursor.next()
                 try :
                     connection_list.append(Connection.to_connection(user_with_connection))
-                    if len(connection_list) == 1000 or not user_with_connections_cursor.alive:
+                    if len(connection_list) == 3000 or not user_with_connections_cursor.alive:
                         connection_push_begin = datetime.now()
                         insert_connection(connection_list, partner_id_dict)
 
