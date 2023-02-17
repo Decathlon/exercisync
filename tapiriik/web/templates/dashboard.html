@@ -153,7 +153,7 @@
 	{% endif %}
 
 {% else %}
-	{% ifequal device_support 'web' %}
+	{% comment %} {% ifequal device_support 'web' %} {% endcomment %}
 	<p>
 		{% trans "Get your sports activities in your favorite apps." %}
 	</p>
@@ -270,7 +270,7 @@
 			<a class="button secondary" href="./faq">{% trans "Read the FAQ" %}</a>
 		</li>
 	</ul>
-	{% endifequal%}
+	{% comment %} {% endifequal%} {% endcomment %}
 {% endif %}
 {% endblock %}
 
