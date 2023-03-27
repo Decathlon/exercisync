@@ -8,7 +8,7 @@ Django==2.2.27
 pycryptodome
 django-pipeline==1.7.0
 requests_oauthlib==0.4.0
-redis==2.10.6
+redis==4.5.3
 django-ipware
 smashrun-client>=0.6.0
 isodate
