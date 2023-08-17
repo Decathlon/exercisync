@@ -772,7 +772,7 @@ msgstr ""
 "RGPD dans le sujet de l'email."
 
 #: tapiriik/web/templates/static/contact.html:12
-msgid "the support form for other depend"
+msgid "Support form for others demand"
 msgstr "Formulaire de support pour tout autre demande"
 
 #: tapiriik/web/templates/static/faq.html:6
