@@ -9,6 +9,6 @@
 
 {% block content %}
 <p>{% trans "If you are having issues with your account" %}, <b>{% trans "please check" %} <a href="{% url 'activities_dashboard' %}">{% trans "the activity dashboard" %}</a></b> - {% trans "it'll do its best to tell you what went wrong" %}.</p>
-<a href="mailto:membersport@decathlon.com{% if user %}?body=My Hub by DECATHLON user ID is {{ user|dict_get:'_id' }}{% endif %}" target="_blank" class="large">membersport@decathlon.com</a>
+<a href="https://decathlon.volvox.rs/custom_forms/20?&lang=fr-FR">{% trans "the support form for other depend" %}</a>
 <p>{% trans "If you are making an enquiry regarding the European Union's General Data Protection Regulation, please mention &quot;GDPR&quot; in the subject line." %}</p>
 {% endblock %}
