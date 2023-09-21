@@ -21,14 +21,3 @@ Secondly, after translation (edition of po files), compile the files :
 python manage.py compilemessages
 ```
 
-
-## Docker 
-
-* First of all initiate the file tapiriik/local_settings.py
-* Then build the docker to get all the requierements.
-* Finaly launch the docker-compose to get all the containers (redis, mongo, web, RMQ)
-
-```
-docker build --no-cache -t my-hub-decathlon .
-docker-compose up
-```
