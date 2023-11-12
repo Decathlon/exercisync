@@ -45,18 +45,40 @@ LOCALE_PATHS = (
 #LOG_PATH = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), os.pardir)) + '/logs'
 LOG_PATH = os.path.abspath("logs")
 
+# This is an overload of the format method from the logging.Formatter class
+# It goal is to format an exception traceback in one line appended to the logging message 
+# in order to handle it properly in the Filbeat to Kibana stack.
+class OneLineTracebackFormatter(logging.Formatter):
+    def format(self, record):
+        import re
+        logString = super().format(record)
+        if re.search("Traceback",logString) != None :
+            dahStr = logString.replace("\n"," |")
+            # unDoubleQuotifiedStr = re.sub(r"(File )\"|(.py)\"","\g<1>\g<2>'",dahStr)
+            quotifiedTracebackStr = re.sub(r" \|Traceback","|-\"Traceback",dahStr)
+        
+            return quotifiedTracebackStr+"\"-|"
+        return logString + "|-\"\"-|"
+
+
 logging.basicConfig(
-    filename=os.path.abspath("logs") + '/log_global.log',
+    filename=os.path.abspath("logs") + '/old_log_global.log',
     level=logging.INFO,
-    format='%(asctime)s|%(levelname)s\t|%(message)s |%(funcName)s in %(filename)s:%(lineno)d',
+    format='%(asctime)s %(levelname)s "%(message)s" %(funcName)s %(filename)s %(lineno)d ',
     datefmt='%Y-%m-%d %H:%M:%S',
 )
 
 _GLOBAL_LOGGER = logging.getLogger()
 _GLOBAL_LOGGER.setLevel(logging.INFO)
+
+logging_file_handler = logging.FileHandler(os.path.abspath("logs") + '/log_global.log')
+logging_file_handler.setLevel(logging.INFO)
+logging_file_handler.setFormatter(OneLineTracebackFormatter('%(asctime)s %(levelname)s "%(message)s" %(funcName)s %(filename)s %(lineno)d ','%Y-%m-%dT%H:%M:%S%z'))
+_GLOBAL_LOGGER.addHandler(logging_file_handler)
+
 logging_console_handler = logging.StreamHandler(io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8'))
 logging_console_handler.setLevel(logging.INFO)
-logging_console_handler.setFormatter(logging.Formatter('%(asctime)s|%(levelname)s\t|%(message)s |%(funcName)s in %(filename)s:%(lineno)d','%Y-%m-%d %H:%M:%S'))
+logging_console_handler.setFormatter(logging.Formatter('%(asctime)s|%(levelname)s\t|%(message)s |%(funcName)s in %(filename)s:%(lineno)d','%Y-%m-%dT%H:%M:%S%z'))
 _GLOBAL_LOGGER.addHandler(logging_console_handler)
 
 SITE_ID = 1
